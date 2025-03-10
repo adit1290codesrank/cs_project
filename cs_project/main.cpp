@@ -18,7 +18,7 @@ int main() {
         .ignore();
 
     CROW_ROUTE(app, "/test_queue")([]() {
-        PriorityQueue queue(-1);
+        PriorityQueue queue(1);
         queue.enqueue(13);
         queue.enqueue(8);
         queue.enqueue(6);

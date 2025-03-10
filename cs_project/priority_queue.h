@@ -7,15 +7,16 @@ typedef struct node{
 	struct node* next;
 };
 
-//Space complexity is O(n), but to make enqueue more efficient can use array but will make space less efficient
-//Enqueue O(n) can be O(logn), but to use O(logn) we need binary search which can only be done using array
-//Dequeue and top O(1)
-
 //PriorityQueue is a class which is an implementation of element of highest priority to be removed first using linkedlist.
 //For a MaxPriorityQueue(Greater element has more priority) initialize queue with 1
 //PriorityQueue queue(1);
 //For a MinPriorityQueue(Lesser element has more priority) initialize queue with -1
 //PriorityQueue queue(-1);
+
+//Space complexity is O(n), but to make enqueue more efficient can use array but will make space less efficient
+//Enqueue O(n) can be O(logn), but to use O(logn) we need binary search which can only be done using array
+//Dequeue and top O(1)
+
 
 class PriorityQueue{
 	private:
