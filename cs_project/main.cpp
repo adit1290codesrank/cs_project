@@ -1,6 +1,7 @@
 #include <crow.h>
 #include <crow/middlewares/cors.h>
 #include "priority_queue.h"
+#include "heap.h"
 #include <iostream>
 
 int main() {
@@ -18,14 +19,15 @@ int main() {
         .ignore();
 
     CROW_ROUTE(app, "/test_queue")([]() {
-        PriorityQueue queue(1);
-        queue.enqueue(13);
-        queue.enqueue(8);
-        queue.enqueue(6);
-        queue.enqueue(10);
-        std::string res = std::to_string(queue.top());
-        queue.dequeue();
-        res += " " + std::to_string(queue.top());
+        MaxHeap heap;
+        heap.push(13);
+        heap.push(8);
+        heap.push(6);
+        heap.push(10);
+        std::string res = std::to_string(heap.pop());
+        res += " " + std::to_string(heap.pop());
+        res += " " + std::to_string(heap.pop());
+        res += " " + std::to_string(heap.pop());
         return res;
         });
 

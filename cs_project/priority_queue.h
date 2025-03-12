@@ -1,4 +1,5 @@
 #pragma once
+#define MAX_SIZE 10000
 
 //Node for linkedlist
 
@@ -6,7 +7,6 @@ typedef struct node{
 	int data;
 	struct node* next;
 };
-
 //PriorityQueue is a class which is an implementation of element of highest priority to be removed first using linkedlist.
 //For a MaxPriorityQueue(Greater element has more priority) initialize queue with 1
 //PriorityQueue queue(1);
@@ -59,5 +59,4 @@ class PriorityQueue{
 			if (front == NULL) return NULL;
 			return front->data;
 		}
-
 };
