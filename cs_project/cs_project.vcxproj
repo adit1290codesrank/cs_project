@@ -131,6 +131,7 @@
     <ClCompile Include="main.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="graph.h" />
     <ClInclude Include="heap.h" />
     <ClInclude Include="priority_queue.h" />
   </ItemGroup>
