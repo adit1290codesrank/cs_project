@@ -15,118 +15,38 @@ Accessing Max/Min element is O(1)
 
 Space Complexity is O(n)
 */
-class MaxHeap {
-private:
-	std::vector<std::pair<std::string, int>> array;
-	int size;
-	void heapify_pop(int i)
-	{
-		int max = i;
-		if (2 * i + 1 < size && array[2 * i + 1].second > array[max].second)
-		{
-			max = 2 * i + 1;
-		}
-		if (2 * i + 2 < size && array[2 * i + 2].second > array[max].second)
-		{
-			max = 2 * i + 2;
-		}
-		if (max != i)
-		{
-			std::swap(array[i], array[max]);
-			heapify_pop(max);
-		}
-	}
-	void heapify_push(int i)
-	{
-		if (i > 0 && array[i].second > array[(i - 1) / 2].second)
-		{
-			std::swap(array[i], array[(i - 1) / 2]);
-			heapify_push((i - 1) / 2);
-		}
-	}
-public:
-	MaxHeap()
-	{
-		size = 0;
-	}
 
-	bool isEmpty()
-	{
-		if (size > 0) return false;
-		return true;
-	}
-
-	void push(std::pair<std::string, int> data)
-	{
-		array.push_back(data);
-		size++;
-		int index = size - 1;
-		heapify_push(index);
-	}
-
-	std::pair<std::string, int> pop()
-	{
-		if (size == 0)
-		{
-			throw std::underflow_error::underflow_error("Heap underflow");
-		}
-		if (size == 1)
-		{
-			std::pair<std::string, int> data = array[0];
-			array.pop_back();
-			size--;
-			return data;
-		}
-		std::pair<std::string, int> data = array[0];
-		array[0] = array[size - 1];
-		array.pop_back();
-		size--;
-		heapify_pop(0);
-		return data;
-	}
-
-	int top()
-	{
-		if (size == 0)
-		{
-			throw std::underflow_error::underflow_error("Heap underflow");
-		}
-		return array[0].second;
-	}
-};
-
-
-class MinHeap {
+template <typename type> class MaxHeap {
 	private:
-		std::vector<std::pair<std::string, int>> array;
 		int size;
+		std::vector<std::pair<type, int>> array;
 		void heapify_pop(int i)
 		{
-			int min = i;
-			if (2 * i + 1 < size && array[2 * i + 1].second < array[min].second)
+			int max = i;
+			if (2 * i + 1 < size && array[2 * i + 1].second > array[max].second)
 			{
-				min = 2 * i + 1;
+				max = 2 * i + 1;
 			}
-			if (2 * i + 2 < size && array[2 * i + 2].second < array[min].second)
+			if (2 * i + 2 < size && array[2 * i + 2].second > array[max].second)
 			{
-				min = 2 * i + 2;
+				max = 2 * i + 2;
 			}
-			if (min != i)
+			if (max != i)
 			{
-				std::swap(array[i], array[min]);
-				heapify_pop(min);
+				std::swap(array[i], array[max]);
+				heapify_pop(max);
 			}
 		}
 		void heapify_push(int i)
 		{
-			if (i > 0 && array[i].second < array[(i - 1) / 2].second)
+			if (i > 0 && array[i].second > array[(i - 1) / 2].second)
 			{
 				std::swap(array[i], array[(i - 1) / 2]);
 				heapify_push((i - 1) / 2);
 			}
 		}
 	public:
-		MinHeap()
+		MaxHeap()
 		{
 			size = 0;
 		}
@@ -137,15 +57,15 @@ class MinHeap {
 			return true;
 		}
 
-		void push(std::pair<std::string, int> data)
+		void push(type T, int priority)
 		{
-			array.push_back(data);
+			array.push_back({T,priority});
 			size++;
-			int index = size-1;
+			int index = size - 1;
 			heapify_push(index);
 		}
 
-		std::pair<std::string, int> pop()
+		std::pair<type,int> pop()
 		{
 			if (size == 0)
 			{
@@ -153,25 +73,87 @@ class MinHeap {
 			}
 			if (size == 1)
 			{
-				std::pair<std::string, int> data = array[0];
+				std::pair<type, int> data = array[0];
 				array.pop_back();
 				size--;
 				return data;
 			}
-			std::pair<std::string, int> data = array[0];
+			std::pair<type, int> data = array[0];
 			array[0] = array[size - 1];
 			array.pop_back();
 			size--;
 			heapify_pop(0);
 			return data;
 		}
-		
-		int top()
+};
+
+template <typename type> class MinHeap {
+private:
+	int size;
+	std::vector<std::pair<type, int>> array;
+	void heapify_pop(int i)
+	{
+		int min = i;
+		if (2 * i + 1 < size && array[2 * i + 1].second < array[min].second)
 		{
-			if (size == 0)
-			{
-				throw std::underflow_error::underflow_error("Heap underflow");
-			}
-			return array[0].second;
+			min = 2 * i + 1;
 		}
+		if (2 * i + 2 < size && array[2 * i + 2].second < array[min].second)
+		{
+			min = 2 * i + 2;
+		}
+		if (min != i)
+		{
+			std::swap(array[i], array[min]);
+			heapify_pop(min);
+		}
+	}
+	void heapify_push(int i)
+	{
+		if (i > 0 && array[i].second < array[(i - 1) / 2].second)
+		{
+			std::swap(array[i], array[(i - 1) / 2]);
+			heapify_push((i - 1) / 2);
+		}
+	}
+public:
+	MinHeap()
+	{
+		size = 0;
+	}
+
+	bool isEmpty()
+	{
+		if (size > 0) return false;
+		return true;
+	}
+
+	void push(type T, int priority)
+	{
+		array.push_back({T, priority});
+		size++;
+		int index = size - 1;
+		heapify_push(index);
+	}
+
+	std::pair<type, int> pop()
+	{
+		if (size == 0)
+		{
+			throw std::underflow_error::underflow_error("Heap underflow");
+		}
+		if (size == 1)
+		{
+			std::pair<type, int> data = array[0];
+			array.pop_back();
+			size--;
+			return data;
+		}
+		std::pair<type, int> data = array[0];
+		array[0] = array[size - 1];
+		array.pop_back();
+		size--;
+		heapify_pop(0);
+		return data;
+	}
 };
