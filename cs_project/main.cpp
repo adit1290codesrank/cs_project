@@ -101,5 +101,5 @@ int main() {
         return crow::response(200, response);
         });
 
-    app.port(8080).multithreaded().run();
+    app.port(80).multithreaded().run();
 }
