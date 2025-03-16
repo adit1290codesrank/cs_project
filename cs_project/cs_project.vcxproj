@@ -129,12 +129,13 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="main.cpp" />
+    <ClCompile Include="min_heap.h" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="graph.h" />
-    <ClInclude Include="heap.h" />
+    <ClInclude Include="max_heap.h" />
     <ClInclude Include="priority_queue.h" />
-    <ClInclude Include="templates\utils.h" />
+    <ClInclude Include="min_cash_flow.h" />
   </ItemGroup>
   <ItemGroup>
     <None Include="templates\test.html" />
