@@ -1,0 +1,129 @@
+﻿<!doctype html>
+<html lang="en" data-bs-theme="dark">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Log In</title>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
+</head>
+<body>
+
+    <nav class="navbar navbar-expand-lg bg-body-tertiary">
+        <div class="container-fluid">
+            <a class="navbar-brand" href="#">CS Project</a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <form class="d-flex" role="search">
+                <a class="btn btn-primary me-2" href="/signup">Sign Up</a>
+                <a class="btn btn-outline-primary me-3" href="login">Log In</a>
+            </form>
+        </div>
+    </nav>
+
+    <div class="container-fluid text-center p-5 m-auto w-25">
+        <main class="form-signin w-100 m-auto pt-5">
+                <h1 class="h3 mb-3 fw-normal">Please log in</h1>
+
+                <div class="input-group pt-3">
+                    <span class="input-group-text" id="basic-addon1">@</span>
+                    <input id="username" type="text" class="form-control" placeholder="Username" autocomplete="off" aria-label="Username" aria-describedby="basic-addon1">
+                </div>
+                <div class="form-text text-danger-emphasis" id="username_needed" hidden>*Username needed</div>
+                <hr />
+                <div class="input-group">
+                    <span class="input-group-text" id="basic-addon1">●</span>
+                    <input id="password" type="password" class="form-control" placeholder="Password" aria-label="Password" aria-describedby="basic-addon1">
+                </div>
+                <div class="form-text text-danger-emphasis" id="password_needed" hidden>*Password needed</div>
+                <div class="form-check text-start my-3">
+                </div>
+                <button class="btn btn-primary w-100 py-2" type="submit" id="login">Login</button>
+        </main>
+    </div>
+    <script>
+        async function validate_login() {
+            Swal.fire({
+                title: "Loading...",
+                didOpen: async () => {
+                    Swal.showLoading();
+                    if (localStorage.getItem("login_id")) {
+                        var json = JSON.stringify([localStorage.getItem("login_id")]);
+                        const response = await fetch('/validate_login', {
+                            method: "POST",
+                            body: json
+                        });
+                        response.text().then(function (text) {
+                            var obj = JSON.parse(text);
+                            if (obj[0]) window.location.href = "/test";
+                        });
+                    }
+                    Swal.close();
+                },
+                allowOutsideClick: () => !Swal.isLoading()
+            })
+        }
+        $(document).ready(function () {
+            validate_login();
+            $("#login").bind("click", function () {
+                if ($("#username").val() && $("#password").val()) {
+                    $("#username_needed").prop("hidden", true);
+                    $("#password_needed").prop("hidden", true);
+                    Swal.fire({
+                        title: "Loading...",
+                        didOpen: async () => {
+                            Swal.showLoading();
+                            try {
+                                var creds = [$("#username").val(), $("#password").val()];
+                                var json = JSON.stringify(creds);
+                                const response = await fetch('/login_user', {
+                                    method: "POST",
+                                    body: json
+                                });
+                                response.text().then(function (text) {
+                                    const obj = JSON.parse(text);
+                                    if (obj[0])
+                                    {
+                                        localStorage.setItem("login_id", obj[1]);
+                                        window.location.href = "/test";
+                                    }
+                                    if (!obj[0]) Swal.fire("Incorrect credentials");
+                                })
+                                if (!response.ok) {
+                                    return Swal.showValidationMessage(`${JSON.stringify(await response.json())}`);
+                                }
+                            } catch (error) {
+                                Swal.showValidationMessage(`Request failed: ${error}`);
+                            }
+                        },
+                        allowOutsideClick: () => !Swal.isLoading()
+                    })
+                }
+                else
+                {
+                    if ($("#username").val() && !$("#password").val()) {
+                        $("#username_needed").prop("hidden", true);
+                        $("#password_needed").removeAttr("hidden");
+                    }
+                    if (!$("#username").val() && $("#password").val())
+                    {
+                        $("#username_needed").removeAttr("hidden");
+                        $("#password_needed").prop("hidden", true);
+                    }
+                    if (!$("#username").val() && !$("#password").val())
+                    {
+                        $("#password_needed").removeAttr("hidden");
+                        $("#username_needed").removeAttr("hidden");
+                    }
+                    return false;
+                }
+            });
+        })
+    </script>
+        <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz" crossorigin="anonymous"></script>
+        <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.8/dist/umd/popper.min.js" integrity="sha384-I7E8VVD/ismYTF4hNIPjVp/Zjvgyol6VFvRkX/vR+Vc4jQkC+hVqc2pM8ODewa9r" crossorigin="anonymous"></script>
+        <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.min.js" integrity="sha384-0pUGZvbkm6XF6gxjEnlmuGrJXVbNuzT9qBBavbLwCsOGabYfZo0T0to5eqruptLy" crossorigin="anonymous"></script>
+</body>
+</html>

@@ -15,8 +15,11 @@
             <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
                 <span class="navbar-toggler-icon"></span>
             </button>
+            <p class="navbar-brand m-auto" id="welcome_text"></p>
             <form class="d-flex" role="search">
-                <input class="form-control" type="file" id="formFile">
+                <button id="log_out" class="btn btn-primary me-2" hidden>Log Out</button>
+                <a class="btn btn-primary me-2" id="sign_up" href="/signup">Sign Up</a>
+                <a class="btn btn-outline-primary me-3" id="log_in" href="login">Log In</a>
             </form>
         </div>
     </nav>
@@ -32,7 +35,61 @@
         <button id="calculate" type="button" class="btn btn-primary" disabled>Calculate</button>
     </div>
     <script>
+        async function validate_login() {
+            Swal.fire({
+                title: "Loading...",
+                didOpen: async () => {
+                    Swal.showLoading();
+                    if (localStorage.getItem("login_id")) {
+                        var json = JSON.stringify([localStorage.getItem("login_id")]);
+                    }
+                    else
+                    {
+                        var json = JSON.stringify([""]);
+                    }
+                    const response = await fetch('/validate_login', {
+                        method: "POST",
+                        body: json
+                    });
+                    response.text().then(function (text) {
+                        var obj = JSON.parse(text);
+                        if (!obj[0]) window.location.href = "/login";
+                        $("#welcome_text").html("Welome, " + obj[1]);
+                        $("#log_in").prop("hidden", true);
+                        $("#sign_up").prop("hidden", true);
+                        $("#log_out").removeAttr("hidden");
+                    });
+                    Swal.close();
+                },
+                allowOutsideClick: () => !Swal.isLoading()
+            })
+        }
         $(document).ready(function () {
+            validate_login();
+            $("#log_out").bind("click", function () {
+                Swal.fire({
+                    title: "Logging out...",
+                    didOpen: async () => {
+                        Swal.showLoading();
+                        var json = JSON.stringify([localStorage.getItem("login_id")]);
+                        const response = await fetch('/logout', {
+                            method: "POST",
+                            body: json
+                        });
+                        response.text().then(function (text) {
+                            var obj = JSON.parse(text);
+                            if (obj[0])
+                            {
+                                localStorage.setItem("login_id", "");
+                                window.location.href = "/login"
+                            }
+                            return false;
+                        });
+                    },
+                    allowOutsideClick: () => !Swal.isLoading()
+                })
+                return false;
+            })
             $("#person_input").bind("change", function () {
                 let n = $("#person_input").val();
                 if (n < 3)

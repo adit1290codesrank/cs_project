@@ -35,8 +35,17 @@
     <ClInclude Include="min_cash_flow.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="utils.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="templates\test.html" />
+    <None Include="templates\login.html" />
+  </ItemGroup>
+  <ItemGroup>
+    <Text Include="env.txt">
+      <Filter>Resource Files</Filter>
+    </Text>
   </ItemGroup>
 </Project>
