@@ -47,7 +47,7 @@ class Encryption {
 		std::string message;
 		//Converts to binary
 		std::vector<unsigned long> to_binary(std::string string);
-		//Adds padding(1000....) to make length 512-64 bits
+		//Adds padding(1000....) to make length 512 - 64(448) bits
 		std::vector<unsigned long> padding(std::vector<unsigned long> vector);
 		//Resize from 64 8 bits sections to 16 32 bits sections
 		std::vector<unsigned long> resize(std::vector<unsigned long> vector);

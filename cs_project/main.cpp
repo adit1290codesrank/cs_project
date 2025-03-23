@@ -68,6 +68,149 @@ int main() {
         return crow::response(200, "[true,\"" + result_string + "\" ]");
     });
 
+    CROW_ROUTE(app, "/add_group_post").methods(crow::HTTPMethod::POST)([](const crow::request& req) {
+        std::map<std::string, std::string> env = readEnv("./env.txt");
+        crow::json::rvalue data = crow::json::load(req.body);
+        std::string login_id = data[0].s();
+        boost::asio::io_context ctx;
+        boost::mysql::any_connection conn(ctx);
+        boost::mysql::connect_params params;
+        params.server_address.emplace_host_and_port(env["HOST"], std::stod(env["PORT"]));
+        params.username = env["USER"];
+        params.password = env["PWD"];
+        params.database = env["DB_USER"];
+        conn.connect(params);
+        boost::mysql::results result_select;
+        const std::string statement_select = "SELECT username FROM login_id WHERE login_id=\"" + login_id + "\"";
+        conn.execute(statement_select, result_select);
+        conn.close();
+        std::string owner = result_select.rows().at(0).at(0).as_string();
+        std::string name = data[1].s();
+        std::string desc = data[2].s();
+        std::string image_base_url;
+        if (data[3].b()) image_base_url = data[4].s();
+        else image_base_url = "null";
+        boost::asio::io_context ctx2;
+        boost::mysql::any_connection conn_group(ctx2);
+        boost::mysql::connect_params params_group;
+        params_group.server_address.emplace_host_and_port(env["HOST"], std::stod(env["PORT"]));
+        params_group.username = env["USER"];
+        params_group.password = env["PWD"];
+        params_group.database = env["DB_GROUP"];
+        conn_group.connect(params_group);
+        boost::mysql::results result_insert;
+        Encryption sha256(owner + name);
+        std::string group_id = sha256.encrypt_sha256();
+        std::string statement_insert;
+        if (data[3].b())
+        {
+            statement_insert = "INSERT INTO _groups VALUES(\"" + group_id +"\", \""+owner+"\", \"["+owner+"]\", \""+name+"\", \""+desc+"\", \"" + image_base_url+"\")";
+        }
+        else
+        {
+            statement_insert = "INSERT INTO _groups VALUES(\"" + group_id + "\", \"" + owner + "\", \"["+owner+"]\", \"" + name + "\", \"" + desc + "\")";
+        }
+        conn_group.execute(statement_insert, result_insert);
+        conn_group.close();
+        return crow::response(200);
+    });
+
+    CROW_ROUTE(app, "/find_groups").methods(crow::HTTPMethod::POST)([](const crow::request& req) {
+        std::map<std::string, std::string> env = readEnv("./env.txt");
+        crow::json::rvalue data = crow::json::load(req.body);
+        std::string login_id = data[0].s();
+        boost::asio::io_context ctx;
+        boost::mysql::any_connection conn(ctx);
+        boost::mysql::connect_params params;
+        params.server_address.emplace_host_and_port(env["HOST"], std::stod(env["PORT"]));
+        params.username = env["USER"];
+        params.password = env["PWD"];
+        params.database = env["DB_USER"];
+        conn.connect(params);
+        boost::mysql::results result_select;
+        const std::string statement_select = "SELECT username FROM login_id WHERE login_id=\"" + login_id + "\"";
+        conn.execute(statement_select, result_select);
+        conn.close();
+        std::string user = result_select.rows().at(0).at(0).as_string();
+        boost::asio::io_context ctx2;
+        boost::mysql::any_connection conn2(ctx2);
+        boost::mysql::connect_params params2;
+        params2.server_address.emplace_host_and_port(env["HOST"], std::stod(env["PORT"]));
+        params2.username = env["USER"];
+        params2.password = env["PWD"];
+        params2.database = env["DB_GROUP"];
+        conn2.connect(params2);
+        boost::mysql::results result_select2;
+        const std::string statement_select2 = "SELECT * FROM _groups WHERE members LIKE \"%" + user + "%\"";
+        conn2.execute(statement_select2, result_select2);
+        conn2.close();
+        if (!result_select2.rows().empty())
+        {
+            std::string data = "[";
+            for (int i = 0; i < result_select2.rows().size(); i++)
+            {
+                data =  data + "[";
+                for (int j = 0; j < 6; j++)
+                {
+                    std::string to_add = result_select2.rows().at(i).at(j).as_string();
+                    data = data + "\""+to_add +"\""+ ",";
+                }
+                data.pop_back();
+                data = data + "],";
+            }
+            data.pop_back();
+            data = data + "]";
+            return crow::response(200, data);
+        }
+        return crow::response(200, "false");
+    });
+
+    CROW_ROUTE(app, "/add_member/<string>")([](const std::string& group_id) {
+        auto page = crow::mustache::load("add_member.html");
+        return page.render();
+    });
+
+
+    CROW_ROUTE(app, "/add_member_post").methods(crow::HTTPMethod::POST)([](const crow::request& req) {
+        std::map<std::string, std::string> env = readEnv("./env.txt");
+        crow::json::rvalue data = crow::json::load(req.body);
+        std::string group_id = data[1].s();
+        std::string login_id = data[0].s();
+        boost::asio::io_context ctx;
+        boost::mysql::any_connection conn(ctx);
+        boost::mysql::connect_params params;
+        params.server_address.emplace_host_and_port(env["HOST"], std::stod(env["PORT"]));
+        params.username = env["USER"];
+        params.password = env["PWD"];
+        params.database = env["DB_USER"];
+        conn.connect(params);
+        std::string statement = "SELECT username from login_id WHERE login_id=\"" + login_id + "\"";
+        boost::mysql::results result;
+        conn.execute(statement, result);
+        conn.close();
+        std::string user = result.rows().at(0).at(0).as_string();
+        boost::mysql::any_connection conn2(ctx);
+        boost::mysql::connect_params params2;
+        params2.server_address.emplace_host_and_port(env["HOST"], std::stod(env["PORT"]));
+        params2.username = env["USER"];
+        params2.password = env["PWD"];
+        params2.database = env["DB_GROUP"];
+        conn2.connect(params2);
+        boost::mysql::results result2;
+        std::string statement_select = "SELECT members FROM _groups WHERE group_id=\"" + group_id + "\"";
+        conn2.execute(statement_select, result2);
+        std::string members = result2.rows().at(0).at(0).as_string();
+        if (members.find(user) != std::string::npos)
+        {
+            return crow::response("You are already in the group!");
+        }
+        members.pop_back();
+        members = members + "," + user + "]";
+        std::string statement_update = "UPDATE _groups SET members = \"" + members + "\" WHERE group_id=\"" + group_id + "\"";
+        conn2.execute(statement_update, result2);
+        conn2.close();
+        return crow::response("You have been added to group!");
+    });
     CROW_ROUTE(app, "/logout").methods(crow::HTTPMethod::POST)([](const crow::request& req) {
         std::map<std::string, std::string> env = readEnv("./env.txt");
         crow::json::rvalue data = crow::json::load(req.body);
@@ -83,6 +226,7 @@ int main() {
         std::string statement = "DELETE FROM login_id WHERE login_id=\"" + login_id + "\"";
         boost::mysql::results result;
         conn.execute(statement, result);
+        conn.close();
         return crow::response("[true]");
     });
 
@@ -90,12 +234,17 @@ int main() {
         auto page = crow::mustache::load("login.html");
         return page.render();
     });
-
-    CROW_ROUTE(app, "/test")([]() {
-        auto page = crow::mustache::load("test.html");
+    
+    CROW_ROUTE(app, "/home")([]() {
+        auto page = crow::mustache::load("home.html");
         return page.render();
     });
     
+    CROW_ROUTE(app, "/add_group")([]() {
+        auto page = crow::mustache::load("add_group.html");
+        return page.render();
+    });
+
     CROW_ROUTE(app, "/calculate").methods(crow::HTTPMethod::POST)([](const crow::request& req) {
         crow::json::rvalue data = crow::json::load(req.body);
         int size = data.size();
