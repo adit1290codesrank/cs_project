@@ -104,7 +104,7 @@ int main() {
         std::string statement_insert;
         if (data[3].b())
         {
-            statement_insert = "INSERT INTO _groups VALUES(\"" + group_id +"\", \""+owner+"\", \"["+owner+"]\", \""+name+"\", \""+desc+"\", \"" + image_base_url+"\")";
+            statement_insert = "INSERT INTO _groups VALUES(\"" + group_id +"\", \""+owner+"\", \"["+owner+",]\", \""+name+"\", \""+desc+"\", \"" + image_base_url+"\")";
         }
         else
         {
@@ -141,7 +141,7 @@ int main() {
         params2.database = env["DB_GROUP"];
         conn2.connect(params2);
         boost::mysql::results result_select2;
-        const std::string statement_select2 = "SELECT * FROM _groups WHERE members LIKE \"%" + user + "%\"";
+        const std::string statement_select2 = "SELECT * FROM _groups WHERE members LIKE \"%" + user + ",%\"";
         conn2.execute(statement_select2, result_select2);
         conn2.close();
         if (!result_select2.rows().empty())
@@ -162,7 +162,7 @@ int main() {
             data = data + "]";
             return crow::response(200, data);
         }
-        return crow::response(200, "false");
+        return crow::response(200, "[false]");
     });
 
     CROW_ROUTE(app, "/add_member/<string>")([](const std::string& group_id) {
@@ -200,12 +200,12 @@ int main() {
         std::string statement_select = "SELECT members FROM _groups WHERE group_id=\"" + group_id + "\"";
         conn2.execute(statement_select, result2);
         std::string members = result2.rows().at(0).at(0).as_string();
-        if (members.find(user) != std::string::npos)
+        if (members.find(user+",") != std::string::npos)
         {
             return crow::response("You are already in the group!");
         }
         members.pop_back();
-        members = members + "," + user + "]";
+        members = members +user + ",]";
         std::string statement_update = "UPDATE _groups SET members = \"" + members + "\" WHERE group_id=\"" + group_id + "\"";
         conn2.execute(statement_update, result2);
         conn2.close();
