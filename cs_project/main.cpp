@@ -165,12 +165,104 @@ int main() {
         return crow::response(200, "[false]");
     });
 
+    CROW_ROUTE(app, "/find_trans").methods(crow::HTTPMethod::POST)([](const crow::request& req) {
+        std::map<std::string, std::string> env = readEnv("./env.txt");
+        crow::json::rvalue data = crow::json::load(req.body);
+        std::string login_id = data[0].s();
+        boost::asio::io_context ctx;
+        boost::mysql::any_connection conn(ctx);
+        boost::mysql::connect_params params;
+        params.server_address.emplace_host_and_port(env["HOST"], std::stod(env["PORT"]));
+        params.username = env["USER"];
+        params.password = env["PWD"];
+        params.database = env["DB_USER"];
+        conn.connect(params);
+        boost::mysql::results result_select;
+        const std::string statement_select = "SELECT username FROM login_id WHERE login_id=\"" + login_id + "\"";
+        conn.execute(statement_select, result_select);
+        conn.close();
+        std::string user = result_select.rows().at(0).at(0).as_string();
+        boost::asio::io_context ctx2;
+        boost::mysql::any_connection conn2(ctx2);
+        boost::mysql::connect_params params2;
+        params2.server_address.emplace_host_and_port(env["HOST"], std::stod(env["PORT"]));
+        params2.username = env["USER"];
+        params2.password = env["PWD"];
+        params2.database = env["DB_GROUP"];
+        conn2.connect(params2);
+        boost::mysql::results result_select2;
+        const std::string statement_select2 = "SELECT * FROM _groups WHERE members LIKE \"%" + user + ",%\"";
+        conn2.execute(statement_select2, result_select2);
+        conn2.close();
+        if (!result_select2.rows().empty())
+        {
+            std::string data = "[";
+            for (int i = 0; i < result_select2.rows().size(); i++)
+            {
+                data = data + "[";
+                for (int j = 0; j < 6; j++)
+                {
+                    std::string to_add = result_select2.rows().at(i).at(j).as_string();
+                    data = data + "\"" + to_add + "\"" + ",";
+                }
+                data.pop_back();
+                data = data + "],";
+            }
+            data.pop_back();
+            data = data + "]";
+            return crow::response(200, data);
+        }
+        return crow::response(200, "[false]");
+        });
+
     CROW_ROUTE(app, "/add_member/<string>")([](const std::string& group_id) {
         auto page = crow::mustache::load("add_member.html");
         return page.render();
     });
 
 
+    CROW_ROUTE(app, "/group/<string>")([](const std::string& group_id) {
+        auto page = crow::mustache::load("group_page.html");
+        std::map<std::string, std::string> env = readEnv("./env.txt");
+        boost::asio::io_context ctx;
+        boost::mysql::any_connection conn(ctx);
+        boost::mysql::connect_params params;
+        params.server_address.emplace_host_and_port(env["HOST"], std::stod(env["PORT"]));
+        params.username = env["USER"];
+        params.password = env["PWD"];
+        params.database = env["DB_GROUP"];
+        conn.connect(params);
+        std::string statement = "SELECT * from _groups WHERE group_id=\"" + group_id + "\"";
+        boost::mysql::results result;
+        conn.execute(statement, result);
+        conn.close();
+        std::string group_owner = result.rows().at(0).at(1).as_string();
+        std::string group_members = result.rows().at(0).at(2).as_string();
+        std::string group_name = result.rows().at(0).at(3).as_string();
+        std::string group_desc = result.rows().at(0).at(4).as_string();
+        std::string group_image = result.rows().at(0).at(5).as_string();
+        group_members.pop_back();
+        group_members.erase(0, 1);
+        group_members.pop_back();
+        std::vector<std::string> members;
+        std::stringstream ss(group_members);
+        while (ss.good()) {
+            std::string substr;
+            std::getline(ss, substr, ',');
+            if (substr != group_owner)
+            {
+                members.push_back(substr);
+            }
+        }
+        std::string members_html = "";
+        for (int i = 0; i < members.size(); i++)
+        {
+            members_html = members_html + "<li class=\"list-group-item\">" + members[i] + "</li>";
+        }
+        crow::mustache::context ctx_page({ {"group_name", group_name}, {"group_owner", group_owner}, {"group_desc", group_desc}, {"img_src", group_image}, {"group_members", members_html} });
+        return page.render(ctx_page);
+    });
+    
     CROW_ROUTE(app, "/add_member_post").methods(crow::HTTPMethod::POST)([](const crow::request& req) {
         std::map<std::string, std::string> env = readEnv("./env.txt");
         crow::json::rvalue data = crow::json::load(req.body);
@@ -202,14 +294,14 @@ int main() {
         std::string members = result2.rows().at(0).at(0).as_string();
         if (members.find(user+",") != std::string::npos)
         {
-            return crow::response("You are already in the group!");
+            return crow::response("[false]");
         }
         members.pop_back();
         members = members +user + ",]";
         std::string statement_update = "UPDATE _groups SET members = \"" + members + "\" WHERE group_id=\"" + group_id + "\"";
         conn2.execute(statement_update, result2);
         conn2.close();
-        return crow::response("You have been added to group!");
+        return crow::response("[true]");
     });
     CROW_ROUTE(app, "/logout").methods(crow::HTTPMethod::POST)([](const crow::request& req) {
         std::map<std::string, std::string> env = readEnv("./env.txt");
