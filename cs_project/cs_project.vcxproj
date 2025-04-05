@@ -130,13 +130,13 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="main.cpp" />
-    <ClCompile Include="min_heap.h" />
+    <ClCompile Include="headers\min_heap.h" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="graph.h" />
-    <ClInclude Include="max_heap.h" />
-    <ClInclude Include="min_cash_flow.h" />
-    <ClInclude Include="utils.h" />
+    <ClInclude Include="headers\graph.h" />
+    <ClInclude Include="headers\max_heap.h" />
+    <ClInclude Include="headers\min_cash_flow.h" />
+    <ClInclude Include="headers\utils.h" />
   </ItemGroup>
   <ItemGroup>
     <None Include="templates\add_group.html" />

@@ -1,7 +1,7 @@
 #include <crow.h>
 #include <crow/middlewares/cors.h>
-#include "min_cash_flow.h"
-#include "utils.h"
+#include "./headers/min_cash_flow.h"
+#include "./headers/utils.h"
 #include <iostream>
 #include <boost/mysql/any_connection.hpp>
 #include <boost/mysql/connect_params.hpp>

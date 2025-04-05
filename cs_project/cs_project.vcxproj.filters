@@ -18,21 +18,21 @@
     <ClCompile Include="main.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="min_heap.h">
+    <ClCompile Include="headers\min_heap.h">
       <Filter>Header Files</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="max_heap.h">
+    <ClInclude Include="headers\max_heap.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="graph.h">
+    <ClInclude Include="headers\graph.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="min_cash_flow.h">
+    <ClInclude Include="headers\min_cash_flow.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="utils.h">
+    <ClInclude Include="headers\utils.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
