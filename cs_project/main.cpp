@@ -8,6 +8,7 @@
 #include <boost/mysql/error_with_diagnostics.hpp>
 #include <boost/mysql/results.hpp>
 #include <boost/asio/io_context.hpp>
+#include <ctime>
 
 int main() {
     crow::App<crow::CORSHandler> app;
@@ -115,6 +116,33 @@ int main() {
         return crow::response(200);
     });
 
+    CROW_ROUTE(app, "/add_transaction_post").methods(crow::HTTPMethod::POST)([](const crow::request& req) {
+        std::map<std::string, std::string> env = readEnv("./env.txt");
+        crow::json::rvalue data = crow::json::load(req.body);
+        std::string username = data[0].s();
+        std::string amount = data[1].s();
+        std::string payment_desc = data[2].s();
+        std::string split_json = data[3].s();
+        std::string group_id = data[4].s();
+        std::string date = data[5].s();
+        boost::asio::io_context ctx2;
+        boost::mysql::any_connection conn_group(ctx2);
+        boost::mysql::connect_params params_group;
+        params_group.server_address.emplace_host_and_port(env["HOST"], std::stod(env["PORT"]));
+        params_group.username = env["USER"];
+        params_group.password = env["PWD"];
+        params_group.database = env["DB_GROUP"];
+        conn_group.connect(params_group);
+        boost::mysql::results result_insert;
+        Encryption sha256(username + group_id + date);
+        std::string transaction_id = sha256.encrypt_sha256();
+        std::string statement_insert;
+        statement_insert = "INSERT INTO transactions VALUES(\"" + transaction_id + "\", \"" + amount + "\", \"" + username + "\", \"" + split_json + "\", \"" + payment_desc + "\", \"" + group_id + "\", \"" + date + "\")";
+        conn_group.execute(statement_insert, result_insert);
+        conn_group.close();
+        return crow::response(200);
+        });
+
     CROW_ROUTE(app, "/find_groups").methods(crow::HTTPMethod::POST)([](const crow::request& req) {
         std::map<std::string, std::string> env = readEnv("./env.txt");
         crow::json::rvalue data = crow::json::load(req.body);
@@ -154,6 +182,152 @@ int main() {
                 {
                     std::string to_add = result_select2.rows().at(i).at(j).as_string();
                     data = data + "\""+to_add +"\""+ ",";
+                }
+                data.pop_back();
+                data = data + "],";
+            }
+            data.pop_back();
+            data = data + "]";
+            return crow::response(200, data);
+        }
+        return crow::response(200, "[false]");
+    });
+
+    CROW_ROUTE(app, "/minimum_cash_flow").methods(crow::HTTPMethod::POST)([](const crow::request& req) {
+        std::map<std::string, std::string> env = readEnv("./env.txt");
+        crow::json::rvalue data = crow::json::load(req.body);
+        std::string group_id = data[0].s();
+        boost::asio::io_context ctx2;
+        boost::mysql::any_connection conn2(ctx2);
+        boost::mysql::connect_params params2;
+        params2.server_address.emplace_host_and_port(env["HOST"], std::stod(env["PORT"]));
+        params2.username = env["USER"];
+        params2.password = env["PWD"];
+        params2.database = env["DB_GROUP"];
+        conn2.connect(params2);
+        boost::mysql::results result_select2;
+        const std::string statement_select2 = "SELECT cashier,members FROM transactions WHERE group_id = \"" + group_id + "\"";
+        conn2.execute(statement_select2, result_select2);
+        conn2.close();
+        if (!result_select2.rows().empty())
+        {
+            std::string response = "";
+            std::map<std::string, int> person_id;
+            int person_id_curr = 0;
+            for (int i = 0; i < result_select2.rows().size(); i++)
+            {
+                std::string cashier = result_select2.rows().at(i).at(0).as_string();
+                if (!person_id.contains(cashier))
+                {
+                    person_id.insert({ cashier,person_id_curr });
+                    person_id_curr++;
+                }
+                std::string split_string_json = result_select2.rows().at(i).at(1).as_string();
+                split_string_json = split_string_json.substr(1, split_string_json.length() - 2);
+                std::stringstream ss(split_string_json);
+                while (ss.good()) {
+                    std::string substr;
+                    std::getline(ss, substr, ',');
+                    std::string key = "", value = "";
+                    int pos = substr.find(":");
+                    key = substr.substr(0, pos);
+                    value = substr.substr(pos + 1);
+                    key = key.substr(1, key.length() - 2);
+                    if (!person_id.contains(key))
+                    {
+                        person_id.insert({ key, person_id_curr });
+                        person_id_curr++;
+                    }
+                }
+            }
+            Graph transactions(person_id_curr);
+            for (int i = 0; i < result_select2.rows().size(); i++)
+            {
+                std::string cashier = result_select2.rows().at(i).at(0).as_string();
+                std::string split_string_json = result_select2.rows().at(i).at(1).as_string();
+                split_string_json = split_string_json.substr(1, split_string_json.length() - 2);
+                std::stringstream ss(split_string_json);
+                while (ss.good()) {
+                    std::string substr;
+                    std::getline(ss, substr, ',');
+                    std::string key = "", value = "";
+                    int pos = substr.find(":");
+                    key = substr.substr(0, pos);
+                    value = substr.substr(pos + 1);
+                    key = key.substr(1, key.length() - 2);
+                    transactions.insertEdge(person_id.at(key), person_id.at(cashier), stoi(value));
+                }
+            }
+            response = min_cash_flow(transactions, person_id);
+            return crow::response("[\"" + response + "\",\"" + graph_to_image(transactions, person_id) + "\"]");
+        }
+        return crow::response(200, "[false]");
+    });
+
+
+    CROW_ROUTE(app, "/find_transaction").methods(crow::HTTPMethod::POST)([](const crow::request& req) {
+        std::map<std::string, std::string> env = readEnv("./env.txt");
+        crow::json::rvalue data = crow::json::load(req.body);
+        std::string transaction_id = data[0].s();
+        boost::asio::io_context ctx2;
+        boost::mysql::any_connection conn2(ctx2);
+        boost::mysql::connect_params params2;
+        params2.server_address.emplace_host_and_port(env["HOST"], std::stod(env["PORT"]));
+        params2.username = env["USER"];
+        params2.password = env["PWD"];
+        params2.database = env["DB_GROUP"];
+        conn2.connect(params2);
+        boost::mysql::results result_select2;
+        const std::string statement_select2 = "SELECT * FROM transactions WHERE transaction_id = \"" + transaction_id + "\"";
+        conn2.execute(statement_select2, result_select2);
+        conn2.close();
+        if (!result_select2.rows().empty())
+        {
+            std::string data = "[";
+            for (int i = 0; i < result_select2.rows().size(); i++)
+            {
+                data = data + "[";
+                for (int j = 0; j < 7; j++)
+                {
+                    std::string to_add = result_select2.rows().at(i).at(j).as_string();
+                    data = data + "\"" + to_add + "\"" + ",";
+                }
+                data.pop_back();
+                data = data + "],";
+            }
+            data.pop_back();
+            data = data + "]";
+            return crow::response(200, data);
+        }
+        return crow::response(200, "[false]");
+    });
+
+    CROW_ROUTE(app, "/find_transactions_group").methods(crow::HTTPMethod::POST)([](const crow::request& req) {
+        std::map<std::string, std::string> env = readEnv("./env.txt");
+        crow::json::rvalue data = crow::json::load(req.body);
+        std::string group_id = data[0].s();
+        boost::asio::io_context ctx2;
+        boost::mysql::any_connection conn2(ctx2);
+        boost::mysql::connect_params params2;
+        params2.server_address.emplace_host_and_port(env["HOST"], std::stod(env["PORT"]));
+        params2.username = env["USER"];
+        params2.password = env["PWD"];
+        params2.database = env["DB_GROUP"];
+        conn2.connect(params2);
+        boost::mysql::results result_select2;
+        const std::string statement_select2 = "SELECT * FROM transactions WHERE group_id = \"" + group_id+"\"";
+        conn2.execute(statement_select2, result_select2);
+        conn2.close();
+        if (!result_select2.rows().empty())
+        {
+            std::string data = "[";
+            for (int i = 0; i < result_select2.rows().size(); i++)
+            {
+                data = data + "[";
+                for (int j = 0; j < 7; j++)
+                {
+                    std::string to_add = result_select2.rows().at(i).at(j).as_string();
+                    data = data + "\"" + to_add + "\"" + ",";
                 }
                 data.pop_back();
                 data = data + "],";
@@ -213,7 +387,7 @@ int main() {
             return crow::response(200, data);
         }
         return crow::response(200, "[false]");
-        });
+    });
 
     CROW_ROUTE(app, "/add_member/<string>")([](const std::string& group_id) {
         auto page = crow::mustache::load("add_member.html");
@@ -259,7 +433,7 @@ int main() {
         {
             members_html = members_html + "<li class=\"list-group-item\">" + members[i] + "</li>";
         }
-        crow::mustache::context ctx_page({ {"group_name", group_name}, {"group_owner", group_owner}, {"group_desc", group_desc}, {"img_src", group_image}, {"group_members", members_html} });
+        crow::mustache::context ctx_page({ {"group_id", group_id}, { "group_name", group_name }, {"group_owner", group_owner}, {"group_desc", group_desc}, {"img_src", group_image}, {"group_members", members_html} });
         return page.render(ctx_page);
     });
     
@@ -337,19 +511,10 @@ int main() {
         return page.render();
     });
 
-    CROW_ROUTE(app, "/calculate").methods(crow::HTTPMethod::POST)([](const crow::request& req) {
-        crow::json::rvalue data = crow::json::load(req.body);
-        int size = data.size();
-        Graph graph(size);
-        for (int i = 0; i < size; i++)
-        {
-            for (int j = 0; j < size; j++)
-            {
-                graph.insertEdge(i, j, std::stod(data[i][j].s()));
-            }
-        }
-        std::string response = min_cash_flow(graph);
-        return crow::response(200, response);
+    CROW_ROUTE(app, "/add_transaction/<string>")([](const std::string& group_id) {
+        auto page = crow::mustache::load("add_transaction.html");
+        crow::mustache::context ctx({ {"group_id",group_id} });
+        return page.render(ctx);
     });
 
     app.port(80).multithreaded().run();

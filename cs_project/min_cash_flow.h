@@ -4,19 +4,48 @@
 #include "min_heap.h"
 #include <string>
 #include <tuple>
+#include <cmath>
 
+
+//Function to generate Graph Image via graphviz
+std::string graph_to_image(Graph graph, std::map<std::string, int> person_id);
 
 //Function which caluclates the minimum cash flow 
-std::string min_cash_flow(Graph graph);
+std::string min_cash_flow(Graph graph, std::map<std::string, int> person_id);
 
 //Initiliazes heaps from graph
-std::tuple < MaxHeap<std::string>, MinHeap<std::string>> initializeHeap(Graph graph);
+std::tuple < MaxHeap<std::string>, MinHeap<std::string>> initializeHeap(Graph graph, std::map<std::string, int> person_id);
 
-std::string min_cash_flow(Graph graph)
+std::string graph_to_image(Graph graph, std::map<std::string, int> person_id)
+{
+    std::string response = "";
+    for (int i = 0; i < graph.getSize(); i++)
+    {
+        for (int j = 0; j < graph.getSize(); j++)
+        {
+            std::string name1, name2;
+            for (auto const& [key, value] : person_id)
+            {
+                if (value == i)
+                {
+                    name1 = key;
+                }
+                if (value == j)
+                {
+                    name2 = key;
+                }
+            }
+            if(graph.getEdge(i, j)!=0) response = response + name1 + "->" + name2 + "[label=" + std::to_string(graph.getEdge(i, j)) + "];";
+        }
+    }
+    return "https://quickchart.io/graphviz?format=png&width=500&height=500&graph=digraph{" + response + "}";
+}
+
+std::string min_cash_flow(Graph graph, std::map<std::string, int> person_id)
 {
 	MaxHeap<std::string> creditors;
 	MinHeap<std::string> debitors;
-    std::tie(creditors, debitors) = initializeHeap(graph);
+    std::tie(creditors, debitors) = initializeHeap(graph, person_id);
     std::string response;
     while (!creditors.isEmpty() && !debitors.isEmpty())
     {
@@ -41,13 +70,20 @@ std::string min_cash_flow(Graph graph)
     return response;
 }
 
-std::tuple < MaxHeap<std::string>, MinHeap<std::string>> initializeHeap(Graph graph)
+std::tuple < MaxHeap<std::string>, MinHeap<std::string>> initializeHeap(Graph graph, std::map<std::string, int> person_id)
 {
 	MaxHeap<std::string> creditors;
 	MinHeap<std::string> debitors;
     for (int i = 0; i < graph.getSize(); i++)
     {
-        std::string name = "Person " + std::to_string(i + 1);
+        std::string name;
+        for (auto const& [key, value] : person_id)
+        {
+            if (value == i)
+            {
+                name = key;
+            }
+        }
         int amount = 0;
         for (int j = 0; j < graph.getSize(); j++)
         {

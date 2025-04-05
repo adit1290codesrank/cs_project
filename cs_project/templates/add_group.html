@@ -116,7 +116,8 @@
                                         icon: "success",
                                         title: "Success",
                                         text: "Group created",
-                                        footer: '<a href="#">Click here to start inviting members!</a>'
+                                    }).then(function () {
+                                        window.location.href = window.location.href.replace("add_group", "home");
                                     });
                                 }
                                 if (!response.ok) {

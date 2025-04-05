@@ -17,6 +17,10 @@
         .bi {
             font-style: normal;
         }
+        li span {
+            position: relative;
+            left: -10px;
+        }
     </style>
 </head>
 <body>
@@ -46,49 +50,55 @@
             </div>
         </div>
     </nav>
-    <div id="container" class="container-fluid m-auto text-center" style="width:85%;max-height:80%">
-        <h1 class="pt-5">{{group_name}}</h1>
-        <hr />
-        <div class="row p-3">
-            <div class="col">
-                <div class="card">
-                    <img src="{{img_src}}" class="card-img-top w-100" alt="...">
-                    <div class="card-body">
-                        <p class="card-text">{{group_desc}}</p>
-                    </div>
-                </div>
-            </div>
-            <div class="col">
-                <div class="card">
-                    <div class="card-header">
-                        Members
-                    </div>
-                    <ul id="members_list" class="list-group list-group-flush">
-                        <li class="list-group-item"><b>{{group_owner}}<i class="bi bi-person-fill"></i></b></li>
-                    </ul>
-                </div>   
-            </div>
-        </div>
-    </div>
-    <div id="transactions" class="container-fluid m-auto" style="width:50%">
-        <h1 class="pt-5 text-center">Transactions</h1>
-        <hr />
-        <div class="row p-3">
-            <a class="btn btn-primary" style="width:30%" href="/add_transaction"><i class="bi bi-plus-circle-fill">Add Transaction</i></a>
-        </div>
-        <div class="row p-3">
-            <div class="card card-hover">
-                <div class="card-header">
-                            Guy's name
-                </div>
+    <div class="row m-auto text-center p-5 row-cols-2">
+        <div class="col">
+            <div class="card">
+                <h5 class="card-header">{{group_name}}</h5>
                 <div class="card-body">
-                    <h5 class="card-title">Moneh he paid</h5>
-                    <p class="card-text">some description of payment</p>
-                    <a href="#" class="btn btn-primary">More Details -></a>
+                    <div class="row g-0">
+                        <div class="col-md-4"><img src={{img_src}} class="img rounded-start" style="height:30vh" alt="..."></div>
+                        <div class="col-md-8">
+                            <br />
+                            <p class="card-text">{{group_desc}}</p>
+                            <br />
+                            <br />
+                            <br />
+                            <br />
+                            <br />
+                            <div class="form-check form-switch form-check-reverse">
+                                <input class="form-check-input" type="checkbox" id="toggle_transaction">
+                                <label id="toggle_label" class="form-check-label" for="toggle_transaction">Minimum Cash Flow</label>
+                            </div>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
+        <div class="col">
+            <div class="card"  style="max-height:30vh;overflow-y:auto;">
+                <div class="card-header">
+                    Members
+                </div>
+                <ul id="members_list" class="list-group list-group-flush">
+                    <li class="list-group-item"><b>{{group_owner}}<i class="bi bi-person-fill"></i></b></li>
+                </ul>
+            </div>
+        </div>
+        <div id="container_transactions" class="container-fluid m-auto p-5" style="width:40vw">
+            <div class="row p-3 position-relative">
+                <div class="col-9">
+                    <button id="add_transaction" class="btn btn-primary position-absolute top-0 start-0"><i class="bi bi-plus-circle-fill"> Add Transaction</i></button>
+                </div>
+                <div class="col-3">
+                    <button id="view_graph" class="btn btn-primary position-absolute top-0 end-0"><i class="bi bi-info-circle-fill"></i></button>
+                </div>
+            </div>
+        </div>
+        <div id="container_cash_flow" class="container-fluid m-auto p-5" style="width:40vw" hidden>
+
+        </div>
     </div>
+    <div class="{{group_id}}" id="group_id" hidden></div>
     <div class="{{group_members}}" id="members_hidden" hidden></div>
     <script>
         async function validate_login() {
@@ -120,9 +130,133 @@
                 allowOutsideClick: () => !Swal.isLoading()
             })
         }
-        $(document).ready(function () {
+        async function find_transactions() {
+            Swal.fire({
+                title: "Loading...",
+                didOpen: async () => {
+                    Swal.showLoading();
+                    var json = JSON.stringify([$("#group_id").attr("class")]);
+                    const response = await fetch('/find_transactions_group', {
+                        method: "POST",
+                        body: json
+                    });
+                    response.text().then(function (text) {
+                        obj = JSON.parse(text);
+                        var container = ""
+                        if (!obj[0]) {
+                            container = container + `<div class="row p-3 text-center"><h2>No transactions as of now.</h2></div>`
+                        }
+                        else {
+                            for (var i = 0; i < obj.length; i++) {
+                                container = container + `<div class="row p-3">
+                                    <div class="card card-hover p-3" style="height:20vh">
+                                        <div class="card-body position-relative">
+                                            <p class="card-text position-absolute top-0 start-0 ps-4"><small class="text-body-secondary">Paid by</small></p>
+                                            <h4 class="card-text position-absolute top-50 start-0 translate-middle-y ps-4 pb-4">${obj[i][2]}</h4>
+                                            <p class="card-text position-absolute bottom-0 start-0 ps-4"><small class="text-body-secondary">${obj[i][6]}</small></p>
+                                            <h4 class="card-text position-absolute top-50 end-0 translate-middle-y pe-4 pb-5">₹${obj[i][1]}</h4>
+                                            <a id=${obj[i][0]} class="transaction-button position-absolute bottom-0 end-0 pe-4 pb-2" style="font-size:25px"><i class="bi bi-info-circle-fill"></i></a>
+                                        </div>
+                                    </div>
+                                </div>`
+                            }
+                        }
+                        $("#container_transactions").append(container);
+                        $(".transaction-button").bind("click", async function (element) {
+                            var json2 = JSON.stringify([$(this).attr('id')]);
+                            const response2 = await fetch('/find_transaction', {
+                                method: "POST",
+                                body: json2
+                            });    
+                            response2.text().then(function (text2) {
+                                var obj2 = JSON.parse(text2);
+                                if (!obj2[0])
+                                {
+                                    Swal.fire({
+                                        icon: "danger",
+                                        title: "Invaid",
+                                        text: "Invalid ID was provided, please try again."
+                                    })
+                                }
+                                else
+                                {
+                                    var split = JSON.parse(obj2[0][3].replaceAll("'", "\""));
+                                    var split_img = ""
+                                    for (var key in split)
+                                    {
+                                        split_img = split_img + key + '->' + obj2[0][2] + "[label=" + String(split[key]) + "];";
+                                    }
+                                    Swal.fire({
+                                        icon:"info",
+                                        title: "Transaction Details",
+                                        text:`${obj2[0][4]}`,
+                                        footer: `Transaction was made by ${obj2[0][2]} on ${obj2[0][6]}`,
+                                        imageUrl: "https://quickchart.io/graphviz?format=png&width=500&height=500&graph=digraph{" + split_img + "}",
+                                        imageWidth: 200,
+                                        imageHeight: 200,
+                                        imageAlt: "Custom image"
+                                    });
+                                }
+                            });
+                        });
+                    });
+                    var json3 = JSON.stringify([$("#group_id").attr("class")]);
+                    const response3 = await fetch('/minimum_cash_flow', {
+                        method: "POST",
+                        body: json3
+                    });
+                    response3.text().then(function (text) {
+                        var obj3 = JSON.parse(text)
+                        if (obj3[0]) {
+                            $("#container_cash_flow").append(obj3[0]);
+                            $("#view_graph").bind("click", function () {
+                                Swal.fire({
+                                    title: "Graph!",
+                                    text: "Visualization of current transactions",
+                                    imageUrl: obj3[1],
+                                    imageWidth: 400,
+                                    imageHeight: 400,
+                                    imageAlt: "Custom image"
+                                });
+                            });
+                        }
+                        else
+                        {
+                            $("#container_cash_flow").append("Everything is settled");
+                            $("#view_graph").bind("click", function () {
+                                Swal.fire({
+                                    icon:"warning",
+                                    title: "Graph!",
+                                    text: "No transactions?",
+                                });
+                            });
+                        }
+                    });
+                    Swal.close();
+                },
+                allowOutsideClick: () => !Swal.isLoading()
+            })
+        }
+        $(document).ready(async function () {
             validate_login();
+            find_transactions();
+            $("#add_transaction").bind("click", function () {
+                window.location.href = window.location.pathname.replace("group", "add_transaction");
+            })
             $("#members_list").append($("#members_hidden").attr("class"));
+            $("#toggle_transaction").bind("change", function () {
+                if ($("#toggle_transaction").is(":checked")) {
+                    $("#toggle_label").html("Transactions");
+                    $("#container_cash_flow").removeAttr("hidden");
+                    $("#container_transactions").prop("hidden", true);
+                }
+                else
+                {
+                    $("#toggle_label").html("Minimum Cash Flow");
+                    $("#container_transactions").removeAttr("hidden");
+                    $("#container_cash_flow").prop("hidden", true);
+                }
+            });
             $("#log_out").bind("click", function () {
                 Swal.fire({
                     title: "Logging out...",
