@@ -35,7 +35,8 @@ std::string graph_to_image(Graph graph, std::map<std::string, int> person_id)
                     name2 = key;
                 }
             }
-            if(graph.getEdge(i, j)!=0) response = response + name1 + "->" + name2 + "[label=" + std::to_string(graph.getEdge(i, j)) + "];";
+            int weight = graph.getEdge(i, j);
+            if(weight!=0) response = response + name1 + "->" + name2 + "[label=" + std::to_string(weight) + "];";
         }
     }
     return "https://quickchart.io/graphviz?format=png&width=500&height=500&graph=digraph{" + response + "}";

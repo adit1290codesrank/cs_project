@@ -339,6 +339,56 @@ int main() {
         return crow::response(200, "[false]");
     });
 
+    CROW_ROUTE(app, "/find_transactions_user").methods(crow::HTTPMethod::POST)([](const crow::request& req) {
+        std::map<std::string, std::string> env = readEnv("./env.txt");
+        crow::json::rvalue data = crow::json::load(req.body);
+        std::string login_id = data[0].s();
+        boost::asio::io_context ctx;
+        boost::mysql::any_connection conn(ctx);
+        boost::mysql::connect_params params;
+        params.server_address.emplace_host_and_port(env["HOST"], std::stod(env["PORT"]));
+        params.username = env["USER"];
+        params.password = env["PWD"];
+        params.database = env["DB_USER"];
+        conn.connect(params);
+        std::string statement = "SELECT username from login_id WHERE login_id=\"" + login_id + "\"";
+        boost::mysql::results result;
+        conn.execute(statement, result);
+        conn.close();
+        std::string user = result.rows().at(0).at(0).as_string();
+        boost::asio::io_context ctx2;
+        boost::mysql::any_connection conn2(ctx2);
+        boost::mysql::connect_params params2;
+        params2.server_address.emplace_host_and_port(env["HOST"], std::stod(env["PORT"]));
+        params2.username = env["USER"];
+        params2.password = env["PWD"];
+        params2.database = env["DB_GROUP"];
+        conn2.connect(params2);
+        boost::mysql::results result_select2;
+        const std::string statement_select2 = "SELECT * FROM transactions WHERE cashier = \"" + user + "\" OR members LIKE \"%'" + user + "'%\"";
+        conn2.execute(statement_select2, result_select2);
+        conn2.close();
+        if (!result_select2.rows().empty())
+        {
+            std::string data = "[";
+            for (int i = 0; i < result_select2.rows().size(); i++)
+            {
+                data = data + "[";
+                for (int j = 0; j < 7; j++)
+                {
+                    std::string to_add = result_select2.rows().at(i).at(j).as_string();
+                    data = data + "\"" + to_add + "\"" + ",";
+                }
+                data.pop_back();
+                data = data + "],";
+            }
+            data.pop_back();
+            data = data + "]";
+            return crow::response(200, data);
+        }
+        return crow::response(200, "[false]");
+        });
+
     CROW_ROUTE(app, "/find_trans").methods(crow::HTTPMethod::POST)([](const crow::request& req) {
         std::map<std::string, std::string> env = readEnv("./env.txt");
         crow::json::rvalue data = crow::json::load(req.body);
@@ -506,6 +556,11 @@ int main() {
         return page.render();
     });
     
+    CROW_ROUTE(app, "/transactions_user")([]() {
+        auto page = crow::mustache::load("transactions.html");
+        return page.render();
+    });
+
     CROW_ROUTE(app, "/add_group")([]() {
         auto page = crow::mustache::load("add_group.html");
         return page.render();

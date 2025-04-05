@@ -43,6 +43,7 @@
     <None Include="templates\add_member.html" />
     <None Include="templates\group_page.html" />
     <None Include="templates\add_transaction.html" />
+    <None Include="templates\transactions.html" />
   </ItemGroup>
   <ItemGroup>
     <Text Include="env.txt">

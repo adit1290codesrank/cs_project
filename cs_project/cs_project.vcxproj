@@ -145,6 +145,7 @@
     <None Include="templates\group_page.html" />
     <None Include="templates\login.html" />
     <None Include="templates\home.html" />
+    <None Include="templates\transactions.html" />
   </ItemGroup>
   <ItemGroup>
     <Text Include="env.txt" />
