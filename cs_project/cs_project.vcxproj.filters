@@ -44,6 +44,10 @@
     <None Include="templates\add_transaction.html" />
     <None Include="templates\transactions.html" />
     <None Include="templates\login.html" />
+    <None Include="src\styles\login.css" />
+    <None Include="src\scripts\login.js" />
+    <None Include="src\styles\home.css" />
+    <None Include="src\scripts\home.js" />
   </ItemGroup>
   <ItemGroup>
     <Text Include="env.txt">

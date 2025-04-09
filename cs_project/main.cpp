@@ -69,6 +69,31 @@ int main() {
         return crow::response(200, "[true,\"" + result_string + "\" ]");
     });
 
+    CROW_ROUTE(app, "/signup").methods(crow::HTTPMethod::POST)([](const crow::request& req) {
+        std::map<std::string, std::string> env = readEnv("./env.txt");
+        crow::json::rvalue data = crow::json::load(req.body);
+        std::string username = data[0].s();
+        std::string password = data[1].s();
+        boost::asio::io_context ctx;
+        boost::mysql::any_connection conn(ctx);
+        boost::mysql::connect_params params;
+        params.server_address.emplace_host_and_port(env["HOST"], std::stod(env["PORT"]));
+        params.username = env["USER"];
+        params.password = env["PWD"];
+        params.database = env["DB_USER"];
+        conn.connect(params);
+        boost::mysql::results result_insert;
+        CROW_LOG_INFO <<username << "/n";
+        const std::string statement_insert = "SELECT username FROM users WHERE username=\"" + username + "\"";
+        conn.execute(statement_insert, result_insert);
+        if (!result_insert.rows().empty()) return crow::response(200, "[false]");
+        std::string statement = "INSERT INTO users VALUES(\"" + username + "\", \"" + password + "\")";
+        boost::mysql::results result;
+        conn.execute(statement, result);
+        conn.close();
+        return crow::response(200, "[true]");
+    });
+
     CROW_ROUTE(app, "/add_group_post").methods(crow::HTTPMethod::POST)([](const crow::request& req) {
         std::map<std::string, std::string> env = readEnv("./env.txt");
         crow::json::rvalue data = crow::json::load(req.body);
@@ -579,9 +604,33 @@ int main() {
 
     CROW_ROUTE(app, "/get")([]() {
         crow::response response;
-        response.set_static_file_info("favicon.ico");
+        response.set_static_file_info("./src/favicon.ico");
         return response;
     });
+
+    CROW_ROUTE(app, "/get_login_js")([]() {
+        crow::response response;
+        response.set_static_file_info("./src/scripts/login.js");
+        return response;
+    });
+
+    CROW_ROUTE(app, "/get_login_css")([]() {
+        crow::response response;
+        response.set_static_file_info("./src/styles/login.css");
+        return response;
+    });
+
+    CROW_ROUTE(app, "/get_home_js")([]() {
+        crow::response response;
+        response.set_static_file_info("./src/scripts/home.js");
+        return response;
+        });
+
+    CROW_ROUTE(app, "/get_home_css")([]() {
+        crow::response response;
+        response.set_static_file_info("./src/styles/home.css");
+        return response;
+        });
 
     app.port(80).multithreaded().run();
 }

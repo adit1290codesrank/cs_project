@@ -139,6 +139,10 @@
     <ClInclude Include="headers\utils.h" />
   </ItemGroup>
   <ItemGroup>
+    <None Include="src\scripts\home.js" />
+    <None Include="src\scripts\login.js" />
+    <None Include="src\styles\home.css" />
+    <None Include="src\styles\login.css" />
     <None Include="templates\add_group.html" />
     <None Include="templates\add_member.html" />
     <None Include="templates\add_transaction.html" />
