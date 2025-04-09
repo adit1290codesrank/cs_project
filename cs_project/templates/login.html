@@ -6,13 +6,277 @@
     <title>Log In</title>
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <link rel="icon" type="image/x-icon" href="/get">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+    <style>
+        @import url('https://fonts.googleapis.com/css?family=Poppins:400,500,600,700,800,900');
+
+        a {
+            cursor: pointer;
+            transition: all 200ms linear
+        }
+
+            a:hover {
+                text-decoration: none
+            }
+
+        .link {
+            color: #fff
+        }
+
+        p {
+            font-weight: 500;
+            font-size: 14px;
+            line-height: 1.7
+        }
+
+        h4 {
+            font-weight: 600
+        }
+
+        h6 span {
+            padding: 0 20px;
+            text-transform: uppercase;
+            font-weight: 700
+        }
+
+        .section {
+            position: relative;
+            width: 100%;
+            display: block
+        }
+
+        .full-height {
+            min-height: 100vh
+        }
+
+        [type="checkbox"]:checked,
+        [type="checkbox"]:not(:checked) {
+            position: absolute;
+            left: -9999px
+        }
+
+        .checkbox:checked + label,
+        .checkbox:not(:checked) + label {
+            position: relative;
+            display: block;
+            text-align: center;
+            width: 60px;
+            height: 16px;
+            border-radius: 2px;
+            padding: 0;
+            margin: 10px auto;
+            cursor: pointer;
+            background-color: #ffffff
+        }
+
+            .checkbox:checked + label:before,
+            .checkbox:not(:checked) + label:before {
+                position: absolute;
+                display: block;
+                width: 36px;
+                height: 36px;
+                border-radius: 10%;
+                color: #EA2C62;
+                background-color: #2a2b38;
+                content: '';
+                z-index: 20;
+                font-size: 12px;
+                top: -10px;
+                left: -10px;
+                line-height: 36px;
+                text-align: center;
+                font-size: 24px;
+                transition: all 0.5s ease
+            }
+
+            .checkbox:checked + label:before {
+                transform: translateX(44px) rotate(-270deg)
+            }
+
+        .card-3d-wrap {
+            position: relative;
+            width: 440px;
+            max-width: 100%;
+            height: 400px;
+            -webkit-transform-style: preserve-3d;
+            transform-style: preserve-3d;
+            perspective: 800px;
+            margin-top: 40px
+        }
+
+        .card-3d-wrapper {
+            width: 100%;
+            height: 100%;
+            position: absolute;
+            top: 0;
+            left: 0;
+            -webkit-transform-style: preserve-3d;
+            transform-style: preserve-3d;
+            transition: all 600ms ease-out
+        }
+
+        .login-div {
+            width: 150px
+        }
+
+        .card-front,
+        .card-back {
+            width: 100%;
+            height: 100%;
+            background-color: #2a2b38;
+            position: absolute;
+            border-radius: 0px;
+            left: 0;
+            top: 0;
+            -webkit-transform-style: preserve-3d;
+            transform-style: preserve-3d;
+            backface-visibility: hidden
+        }
+
+        .card-back {
+            transform: rotateY(180deg)
+        }
+
+        .checkbox:checked ~ .card-3d-wrap .card-3d-wrapper {
+            transform: rotateY(180deg)
+        }
+
+        .center-wrap {
+            position: absolute;
+            width: 100%;
+            padding: 0 35px;
+            top: 50%;
+            left: 0;
+            transform: translate3d(0, -50%, 35px) perspective(100px);
+            z-index: 20;
+            display: block
+        }
+
+        .form-group {
+            position: relative;
+            display: block;
+            margin: 0;
+            padding: 0
+        }
+
+        .form-style {
+            padding: 13px 20px;
+            padding-left: 55px;
+            height: 48px;
+            width: 100%;
+            font-weight: 500;
+            border-radius: 4px;
+            font-size: 14px;
+            line-height: 22px;
+            letter-spacing: 0.5px;
+            outline: none;
+            color: #c4c3ca;
+            background-color: #1f2029;
+            border: none;
+            transition: all 200ms linear;
+            box-shadow: 0 4px 8px 0 rgba(21, 21, 21, .2)
+        }
+
+            .form-style:focus,
+            .form-style:active {
+                border: none;
+                outline: none;
+                box-shadow: 0 4px 8px 0 rgba(21, 21, 21, .2)
+            }
+
+        .input-icon {
+            position: absolute;
+            top: 0;
+            left: 18px;
+            height: 48px;
+            font-size: 24px;
+            line-height: 48px;
+            text-align: left;
+            transition: all 200ms linear
+        }
+
+        .form-group input:-ms-input-placeholder {
+            color: #c4c3ca;
+            opacity: 0.7;
+            transition: all 200ms linear
+        }
+
+        .form-group input::-moz-placeholder {
+            color: #c4c3ca;
+            opacity: 0.7;
+            transition: all 200ms linear
+        }
+
+        .form-group input:-moz-placeholder {
+            color: #c4c3ca;
+            opacity: 0.7;
+            transition: all 200ms linear
+        }
+
+        .form-group input::-webkit-input-placeholder {
+            color: #c4c3ca;
+            opacity: 0.7;
+            transition: all 200ms linear
+        }
+
+        .form-group input:focus:-ms-input-placeholder {
+            opacity: 0;
+            transition: all 200ms linear
+        }
+
+        .form-group input:focus::-moz-placeholder {
+            opacity: 0;
+            transition: all 200ms linear
+        }
+
+        .form-group input:focus:-moz-placeholder {
+            opacity: 0;
+            transition: all 200ms linear
+        }
+
+        .form-group input:focus::-webkit-input-placeholder {
+            opacity: 0;
+            transition: all 200ms linear
+        }
+
+            .btn:active,
+            .btn:focus {
+                background-color: #fff;
+                color: #000000;
+                box-shadow: 0 8px 24px 0 rgba(255, 255, 255, .2)
+            }
+
+            .btn:hover {
+                background-color: #fff;
+                color: #000000;
+                box-shadow: 0 8px 24px 0 rgba(255, 255, 255, .2)
+            }
+
+        .logo {
+            position: absolute;
+            top: 30px;
+            right: 30px;
+            display: block;
+            z-index: 100;
+            transition: all 250ms linear
+        }
+
+            .logo img {
+                height: 26px;
+                width: auto;
+                display: block
+            }
+    </style>
 </head>
 <body>
-
     <nav class="navbar navbar-expand-lg bg-body-tertiary">
         <div class="container-fluid">
-            <a class="navbar-brand" href="#">CS Project</a>
+            <a class="navbar-brand text-center" href="#">
+                <img src="/get" alt="Logo" width="64" height="64" class="rounded d-inline-block">
+                CS Project
+            </a>
             <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
                 <span class="navbar-toggler-icon"></span>
             </button>
@@ -22,26 +286,58 @@
             </form>
         </div>
     </nav>
-
-    <div class="container-fluid text-center p-5 m-auto w-25">
-        <main class="form-signin w-100 m-auto pt-5">
-                <h1 class="h3 mb-3 fw-normal">Please log in</h1>
-
-                <div class="input-group pt-3">
-                    <span class="input-group-text" id="basic-addon1">@</span>
-                    <input id="username" type="text" class="form-control" placeholder="Username" autocomplete="off" aria-label="Username" aria-describedby="basic-addon1">
+    <div class="section">
+        <div class="container">
+            <div class="row full-height justify-content-center">
+                <div class="col-12 text-center align-self-center py-5">
+                    <div class="section pb-5 pt-5 pt-sm-2 text-center">
+                        <h6 class="mb-0 pb-3"><span>Log In </span><span>Sign Up</span></h6>
+                        <input class="checkbox" type="checkbox" id="reg-log" name="reg-log" />
+                        <label for="reg-log"></label>
+                        <div class="card-3d-wrap mx-auto">
+                            <div class="card-3d-wrapper">
+                                <div class="card-front">
+                                    <div class="center-wrap">
+                                        <div class="section text-center">
+                                            <h4 class="mb-4 pb-3">Log In</h4>
+                                            <div class="form-group">
+                                                <input type="text" id="logusername" class="form-style" placeholder="Your Username" id="logemail" autocomplete="none">
+                                                <i class="input-icon bi bi-person-circle"></i>
+                                            </div>
+                                            <div class="form-group mt-2">
+                                                <input type="password" id="logpass" class="form-style" placeholder="Your Password" id="logpass" autocomplete="none">
+                                                <i class="input-icon bi bi-lock-fill"></i>
+                                            </div>
+                                            <button id="login" class="btn btn-primary w-100 mt-4">Login</button>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="card-back">
+                                    <div class="center-wrap">
+                                        <div class="section text-center">
+                                            <h4 class="mb-4 pb-3">Sign Up</h4>
+                                            <div class="form-group">
+                                                <input type="text" id="signusername" class="form-style" placeholder="Your Username" id="logname" autocomplete="none">
+                                                <i class="input-icon bi bi-person-circle"></i>
+                                            </div>
+                                            <div class="form-group mt-2">
+                                                <input type="password" id="signpass" class="form-style" placeholder="Your Password" id="logemail" autocomplete="none">
+                                                <i class="input-icon bi bi-lock-fill"></i>
+                                            </div>
+                                            <div class="form-group mt-2">
+                                                <input type="password" id="signconfirm" class="form-style" placeholder="Confirm Password" id="logpass" autocomplete="none">
+                                                <i class="input-icon bi bi-lock-fill"></i>
+                                            </div>
+                                            <button id="signup" class="btn btn-primary w-100 mt-4">Signup</button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
                 </div>
-                <div class="form-text text-danger-emphasis" id="username_needed" hidden>*Username needed</div>
-                <hr />
-                <div class="input-group">
-                    <span class="input-group-text" id="basic-addon1">●</span>
-                    <input id="password" type="password" class="form-control" placeholder="Password" aria-label="Password" aria-describedby="basic-addon1">
-                </div>
-                <div class="form-text text-danger-emphasis" id="password_needed" hidden>*Password needed</div>
-                <div class="form-check text-start my-3">
-                </div>
-                <button class="btn btn-primary w-100 py-2" type="submit" id="login">Login</button>
-        </main>
+            </div>
+        </div>
     </div>
     <script>
         async function validate_login() {
@@ -68,15 +364,13 @@
         $(document).ready(function () {
             validate_login();
             $("#login").bind("click", function () {
-                if ($("#username").val() && $("#password").val()) {
-                    $("#username_needed").prop("hidden", true);
-                    $("#password_needed").prop("hidden", true);
+                if ($("#logusername").val() && $("#logpass").val()) {
                     Swal.fire({
                         title: "Loading...",
                         didOpen: async () => {
                             Swal.showLoading();
                             try {
-                                var creds = [$("#username").val(), $("#password").val()];
+                                var creds = [$("#logusername").val(), $("#logpass").val()];
                                 var json = JSON.stringify(creds);
                                 const response = await fetch('/login_user', {
                                     method: "POST",
@@ -84,8 +378,7 @@
                                 });
                                 response.text().then(function (text) {
                                     const obj = JSON.parse(text);
-                                    if (obj[0])
-                                    {
+                                    if (obj[0]) {
                                         localStorage.setItem("login_id", obj[1]);
                                         window.location.href = "/home";
                                     }
@@ -101,29 +394,19 @@
                         allowOutsideClick: () => !Swal.isLoading()
                     })
                 }
-                else
-                {
-                    if ($("#username").val() && !$("#password").val()) {
-                        $("#username_needed").prop("hidden", true);
-                        $("#password_needed").removeAttr("hidden");
-                    }
-                    if (!$("#username").val() && $("#password").val())
-                    {
-                        $("#username_needed").removeAttr("hidden");
-                        $("#password_needed").prop("hidden", true);
-                    }
-                    if (!$("#username").val() && !$("#password").val())
-                    {
-                        $("#password_needed").removeAttr("hidden");
-                        $("#username_needed").removeAttr("hidden");
-                    }
+                else {
+                    Swal.fire({
+                        title: "Username and Password?",
+                        text: "Both username and password are needed",
+                        icon: "warning"
+                    });
                     return false;
                 }
             });
         })
     </script>
-        <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz" crossorigin="anonymous"></script>
-        <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.8/dist/umd/popper.min.js" integrity="sha384-I7E8VVD/ismYTF4hNIPjVp/Zjvgyol6VFvRkX/vR+Vc4jQkC+hVqc2pM8ODewa9r" crossorigin="anonymous"></script>
-        <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.min.js" integrity="sha384-0pUGZvbkm6XF6gxjEnlmuGrJXVbNuzT9qBBavbLwCsOGabYfZo0T0to5eqruptLy" crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz" crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.8/dist/umd/popper.min.js" integrity="sha384-I7E8VVD/ismYTF4hNIPjVp/Zjvgyol6VFvRkX/vR+Vc4jQkC+hVqc2pM8ODewa9r" crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.min.js" integrity="sha384-0pUGZvbkm6XF6gxjEnlmuGrJXVbNuzT9qBBavbLwCsOGabYfZo0T0to5eqruptLy" crossorigin="anonymous"></script>
 </body>
 </html>

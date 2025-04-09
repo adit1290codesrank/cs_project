@@ -571,6 +571,17 @@ int main() {
         crow::mustache::context ctx({ {"group_id",group_id} });
         return page.render(ctx);
     });
+    
+    CROW_ROUTE(app, "/login_signup")([]() {
+        auto page = crow::mustache::load("login_signup.html");
+        return page.render();
+    });
+
+    CROW_ROUTE(app, "/get")([]() {
+        crow::response response;
+        response.set_static_file_info("favicon.ico");
+        return response;
+    });
 
     app.port(80).multithreaded().run();
 }

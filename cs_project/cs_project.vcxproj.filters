@@ -38,12 +38,12 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="templates\home.html" />
-    <None Include="templates\login.html" />
     <None Include="templates\add_group.html" />
     <None Include="templates\add_member.html" />
     <None Include="templates\group_page.html" />
     <None Include="templates\add_transaction.html" />
     <None Include="templates\transactions.html" />
+    <None Include="templates\login.html" />
   </ItemGroup>
   <ItemGroup>
     <Text Include="env.txt">
