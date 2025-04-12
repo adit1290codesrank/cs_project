@@ -48,6 +48,10 @@
     <None Include="src\scripts\login.js" />
     <None Include="src\styles\home.css" />
     <None Include="src\scripts\home.js" />
+    <None Include="src\styles\group_page.css" />
+    <None Include="src\scripts\group_page.js" />
+    <None Include="src\styles\transactions.css" />
+    <None Include="src\scripts\transactions.js" />
   </ItemGroup>
   <ItemGroup>
     <Text Include="env.txt">

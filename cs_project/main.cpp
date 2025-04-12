@@ -134,7 +134,7 @@ int main() {
         }
         else
         {
-            statement_insert = "INSERT INTO _groups VALUES(\"" + group_id + "\", \"" + owner + "\", \"["+owner+"]\", \"" + name + "\", \"" + desc + "\")";
+            statement_insert = "INSERT INTO _groups VALUES(\"" + group_id + "\", \"" + owner + "\", \"["+owner+",]\", \"" + name + "\", \"" + desc + "\", \"" + image_base_url + "\")";
         }
         conn_group.execute(statement_insert, result_insert);
         conn_group.close();
@@ -490,6 +490,8 @@ int main() {
         std::string group_name = result.rows().at(0).at(3).as_string();
         std::string group_desc = result.rows().at(0).at(4).as_string();
         std::string group_image = result.rows().at(0).at(5).as_string();
+        if (group_image == "null") group_image = "https://media.istockphoto.com/id/1396814518/vector/image-coming-soon-no-photo-no-thumbnail-image-available-vector-illustration.jpg?s=612x612&w=0&k=20&c=hnh2OZgQGhf0b46-J2z7aHbIWwq8HNlSDaNp2wn_iko=";        else
+        if(group_image != "null") group_image = "data:image;base64," + group_image;
         group_members.pop_back();
         group_members.erase(0, 1);
         group_members.pop_back();
@@ -597,11 +599,6 @@ int main() {
         return page.render(ctx);
     });
     
-    CROW_ROUTE(app, "/login_signup")([]() {
-        auto page = crow::mustache::load("login_signup.html");
-        return page.render();
-    });
-
     CROW_ROUTE(app, "/get")([]() {
         crow::response response;
         response.set_static_file_info("./src/favicon.ico");
@@ -624,13 +621,37 @@ int main() {
         crow::response response;
         response.set_static_file_info("./src/scripts/home.js");
         return response;
-        });
+    });
 
     CROW_ROUTE(app, "/get_home_css")([]() {
         crow::response response;
         response.set_static_file_info("./src/styles/home.css");
         return response;
-        });
+    });
+
+    CROW_ROUTE(app, "/get_group_page_js")([]() {
+        crow::response response;
+        response.set_static_file_info("./src/scripts/group_page.js");
+        return response;
+    });
+
+    CROW_ROUTE(app, "/get_group_page_css")([]() {
+        crow::response response;
+        response.set_static_file_info("./src/styles/group_page.css");
+        return response;
+    });
+
+    CROW_ROUTE(app, "/get_transactions_js")([]() {
+        crow::response response;
+        response.set_static_file_info("./src/scripts/transactions.js");
+        return response;
+    });
+
+    CROW_ROUTE(app, "/get_transactions_css")([]() {
+        crow::response response;
+        response.set_static_file_info("./src/styles/transactions.css");
+        return response;
+    });
 
     app.port(80).multithreaded().run();
 }
