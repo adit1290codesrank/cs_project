@@ -136,9 +136,13 @@
     <ClInclude Include="headers\graph.h" />
     <ClInclude Include="headers\max_heap.h" />
     <ClInclude Include="headers\min_cash_flow.h" />
+    <ClInclude Include="headers\sha256.h" />
     <ClInclude Include="headers\utils.h" />
   </ItemGroup>
   <ItemGroup>
+    <None Include="src\scripts\add_group.js" />
+    <None Include="src\scripts\add_member.js" />
+    <None Include="src\scripts\add_transaction.js" />
     <None Include="src\scripts\group_page.js" />
     <None Include="src\scripts\home.js" />
     <None Include="src\scripts\login.js" />

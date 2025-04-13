@@ -38,7 +38,7 @@ $(document).ready(function () {
                             const obj = JSON.parse(text);
                             if (obj[0]) {
                                 localStorage.setItem("login_id", obj[1]);
-                                window.location.href = "/home";
+                                window.location.href = "/home?justlogin=true";
                             }
                             if (!obj[0]) Swal.fire("Incorrect credentials");
                         })

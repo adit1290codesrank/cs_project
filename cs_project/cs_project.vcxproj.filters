@@ -35,6 +35,9 @@
     <ClInclude Include="headers\utils.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="headers\sha256.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="templates\home.html" />
@@ -52,6 +55,9 @@
     <None Include="src\scripts\group_page.js" />
     <None Include="src\styles\transactions.css" />
     <None Include="src\scripts\transactions.js" />
+    <None Include="src\scripts\add_transaction.js" />
+    <None Include="src\scripts\add_group.js" />
+    <None Include="src\scripts\add_member.js" />
   </ItemGroup>
   <ItemGroup>
     <Text Include="env.txt">

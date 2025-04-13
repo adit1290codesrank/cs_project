@@ -37,11 +37,11 @@ int main() {
         params.database = env["DB_USER"];
         conn.connect(params);
         boost::mysql::results result;
-        const std::string statement = "SELECT * FROM users WHERE username=\"" + username + "\" AND pwd=\"" + password + "\"";
+        std::string hash_password = sha256_encrypt(password);
+        const std::string statement = "SELECT * FROM users WHERE username=\"" + username + "\" AND pwd=\"" + hash_password + "\"";
         conn.execute(statement, result);
         if (result.rows().empty()) return crow::response(200, "[false]");
-        Encryption sha256(username);
-        std::string encrypted = sha256.encrypt_sha256();
+        std::string encrypted = sha256_encrypt(username);
         std::string statement_insert = "INSERT INTO login_id VALUES(\"" + encrypted + "\", \"" + username + "\")";
         conn.execute(statement_insert, result);
         conn.close();
@@ -87,7 +87,8 @@ int main() {
         const std::string statement_insert = "SELECT username FROM users WHERE username=\"" + username + "\"";
         conn.execute(statement_insert, result_insert);
         if (!result_insert.rows().empty()) return crow::response(200, "[false]");
-        std::string statement = "INSERT INTO users VALUES(\"" + username + "\", \"" + password + "\")";
+        std::string hash_password = sha256_encrypt(password);
+        std::string statement = "INSERT INTO users VALUES(\"" + username + "\", \"" + hash_password + "\")";
         boost::mysql::results result;
         conn.execute(statement, result);
         conn.close();
@@ -125,8 +126,7 @@ int main() {
         params_group.database = env["DB_GROUP"];
         conn_group.connect(params_group);
         boost::mysql::results result_insert;
-        Encryption sha256(owner + name);
-        std::string group_id = sha256.encrypt_sha256();
+        std::string group_id = sha256_encrypt(owner + name);
         std::string statement_insert;
         if (data[3].b())
         {
@@ -159,8 +159,7 @@ int main() {
         params_group.database = env["DB_GROUP"];
         conn_group.connect(params_group);
         boost::mysql::results result_insert;
-        Encryption sha256(username + group_id + date);
-        std::string transaction_id = sha256.encrypt_sha256();
+        std::string transaction_id = sha256_encrypt(username + group_id + date);
         std::string statement_insert;
         statement_insert = "INSERT INTO transactions VALUES(\"" + transaction_id + "\", \"" + amount + "\", \"" + username + "\", \"" + split_json + "\", \"" + payment_desc + "\", \"" + group_id + "\", \"" + date + "\")";
         conn_group.execute(statement_insert, result_insert);
@@ -650,6 +649,24 @@ int main() {
     CROW_ROUTE(app, "/get_transactions_css")([]() {
         crow::response response;
         response.set_static_file_info("./src/styles/transactions.css");
+        return response;
+    });
+
+    CROW_ROUTE(app, "/get_add_transaction_js")([]() {
+        crow::response response;
+        response.set_static_file_info("./src/scripts/add_transaction.js");
+        return response;
+    });
+
+    CROW_ROUTE(app, "/get_add_group_js")([]() {
+        crow::response response;
+        response.set_static_file_info("./src/scripts/add_group.js");
+        return response;
+    });
+
+    CROW_ROUTE(app, "/get_add_member_js")([]() {
+        crow::response response;
+        response.set_static_file_info("./src/scripts/add_member.js");
         return response;
     });
 

@@ -27,7 +27,13 @@ async function validate_login() {
             response.text().then(function (text) {
                 var obj = JSON.parse(text);
                 if (!obj[0]) window.location.href = "/login";
-                $("#welcome_text").html("Welome, " + obj[1]);
+                var params = new URLSearchParams(document.location.search);
+                var justlogin = params.get("justlogin");
+                if (justlogin)
+                { 
+                    $('.toast-body').text('Welcome, ' + obj[1] + "!");
+                    $('.toast').toast('show');
+                }
                 $("#log_in").prop("hidden", true);
                 $("#sign_up").prop("hidden", true);
                 $("#log_out").removeAttr("hidden");

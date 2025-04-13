@@ -45,12 +45,10 @@
             <label for="group_name" class="form-label">Group Name</label>
             <input type="text" class="form-control" id="group_name" placeholder="Enter Group's Name...">
         </div>
-        <div class="text-danger-emphasis" id="name_needed" hidden>*Name needed</div>
         <div class="mb-3">
             <label for="group_desc" class="form-label">Group Descriptipn</label>
             <textarea class="form-control" id="group_desc" rows="5" placeholder="Enter Group's Description..."></textarea>
         </div>
-        <div class="text-danger-emphasis" id="desc_needed" hidden>*Description needed</div>
         <div class="mb-3">
             <label for="formFile" class="form-label">Upload Image:</label>
             <input class="form-control" type="file" id="formFile" accept="image/*">
@@ -58,141 +56,7 @@
         </div>
         <button class="btn btn-primary w-100 py-2" type="submit" id="add">Add group</button>
     </div>
-    <script>
-        async function validate_login() {
-            Swal.fire({
-                title: "Loading...",
-                didOpen: async () => {
-                    Swal.showLoading();
-                    if (localStorage.getItem("login_id")) {
-                        var json = JSON.stringify([localStorage.getItem("login_id")]);
-                    }
-                    else {
-                        var json = JSON.stringify([""]);
-                    }
-                    const response = await fetch('/validate_login', {
-                        method: "POST",
-                        body: json
-                    });
-                    response.text().then(function (text) {
-                        var obj = JSON.parse(text);
-                        if (!obj[0]) window.location.href = "/login";
-                        $("#welcome_text").html("Welome, " + obj[1]);
-                        $("#log_in").prop("hidden", true);
-                        $("#sign_up").prop("hidden", true);
-                        $("#log_out").removeAttr("hidden");
-                    });
-                    Swal.close();
-                },
-                allowOutsideClick: () => !Swal.isLoading()
-            })
-        }
-        $(document).ready(function () {
-            validate_login();
-            $("#add").bind("click", function () {
-                if ($("#group_name").val() && $("#group_desc").val()) {
-                    $("#name_needed").prop("hidden", true);
-                    $("#desc_needed").prop("hidden", true);
-                    Swal.fire({
-                        title: "Loading...",
-                        didOpen: async () => {
-                            Swal.showLoading();
-                            try {
-                                var data = [localStorage.getItem("login_id"), $("#group_name").val(), $("#group_desc").val()];
-                                if ($("#formFile").prop("files").length != 0) {
-                                    data.push(true)
-                                    var file = $("#formFile").prop("files")[0];
-                                    var reader = new FileReader();
-                                    reader.readAsBinaryString(file);
-                                    reader.onload = async function () {
-                                        data.push(btoa(reader.result));
-                                        var json = JSON.stringify(data);
-                                        const response = await fetch('/add_group_post', {
-                                            method: "POST",
-                                            body: json
-                                        });
-                                        if (response.ok) {
-                                            Swal.fire({
-                                                icon: "success",
-                                                title: "Success",
-                                                text: "Group created",
-                                            }).then(function () {
-                                                window.location.href = window.location.href.replace("add_group", "home");
-                                            });
-                                        }
-                                        if (!response.ok) {
-                                            return Swal.showValidationMessage(`${JSON.stringify(await response.json())}`);
-                                        }
-                                    };
-                                }
-                                else {
-                                    data.push(false);
-                                    var json = JSON.stringify(data);
-                                    const response = await fetch('/add_group_post', {
-                                        method: "POST",
-                                        body: json
-                                    });
-                                    if (response.ok) {
-                                        Swal.fire({
-                                            icon: "success",
-                                            title: "Success",
-                                            text: "Group created",
-                                        }).then(function () {
-                                            window.location.href = window.location.href.replace("add_group", "home");
-                                        });
-                                    }
-                                    if (!response.ok) {
-                                        return Swal.showValidationMessage(`${JSON.stringify(await response.json())}`);
-                                    }
-                                }                                
-                            } catch (error) {
-                                Swal.showValidationMessage(`Request failed: ${error}`);
-                            }
-                        },
-                        allowOutsideClick: () => !Swal.isLoading()
-                    })
-                }
-                else {
-                    if ($("#group_name").val() && !$("#group_desc").val()) {
-                        $("#name_needed").prop("hidden", true);
-                        $("#desc_needed").removeAttr("hidden");
-                    }
-                    if (!$("#group_name").val() && $("#group_desc").val()) {
-                        $("#name_needed").removeAttr("hidden");
-                        $("#desc_needed").prop("hidden", true);
-                    }
-                    if (!$("#group_name").val() && !$("#group_desc").val()) {
-                        $("#name_needed").removeAttr("hidden");
-                        $("#desc_needed").removeAttr("hidden");
-                    }
-                    return false;
-                }
-            });
-            $("#log_out").bind("click", function () {
-                Swal.fire({
-                    title: "Logging out...",
-                    didOpen: async () => {
-                        Swal.showLoading();
-                        var json = JSON.stringify([localStorage.getItem("login_id")]);
-                        const response = await fetch('/logout', {
-                            method: "POST",
-                            body: json
-                        });
-                        response.text().then(function (text) {
-                            var obj = JSON.parse(text);
-                            if (obj[0]) {
-                                localStorage.setItem("login_id", "");
-                                window.location.href = "/login"
-                            }
-                            return false;
-                        });
-                    },
-                    allowOutsideClick: () => !Swal.isLoading()
-                });
-                return false;
-            });
-        });
-    </script>
+    <script src="/get_add_group_js"></script>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz" crossorigin="anonymous"></script>
     <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.8/dist/umd/popper.min.js" integrity="sha384-I7E8VVD/ismYTF4hNIPjVp/Zjvgyol6VFvRkX/vR+Vc4jQkC+hVqc2pM8ODewa9r" crossorigin="anonymous"></script>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.min.js" integrity="sha384-0pUGZvbkm6XF6gxjEnlmuGrJXVbNuzT9qBBavbLwCsOGabYfZo0T0to5eqruptLy" crossorigin="anonymous"></script>
