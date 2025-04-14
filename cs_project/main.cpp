@@ -41,7 +41,12 @@ int main() {
         const std::string statement = "SELECT * FROM users WHERE username=\"" + username + "\" AND pwd=\"" + hash_password + "\"";
         conn.execute(statement, result);
         if (result.rows().empty()) return crow::response(200, "[false]");
-        std::string encrypted = sha256_encrypt(username);
+        time_t timestamp = time(0);
+        struct tm timeinfo;
+        localtime_s(&timeinfo, &timestamp);
+        char time[80];
+        strftime(time, sizeof(time), "%d-%m-%Y %H:%M:%S", &timeinfo);
+        std::string encrypted = sha256_encrypt(username + time);
         std::string statement_insert = "INSERT INTO login_id VALUES(\"" + encrypted + "\", \"" + username + "\")";
         conn.execute(statement_insert, result);
         conn.close();
@@ -247,7 +252,6 @@ int main() {
                     person_id_curr++;
                 }
                 std::string split_string_json = result_select2.rows().at(i).at(1).as_string();
-                split_string_json = split_string_json.substr(1, split_string_json.length() - 2);
                 std::stringstream ss(split_string_json);
                 while (ss.good()) {
                     std::string substr;
@@ -256,7 +260,6 @@ int main() {
                     int pos = substr.find(":");
                     key = substr.substr(0, pos);
                     value = substr.substr(pos + 1);
-                    key = key.substr(1, key.length() - 2);
                     if (!person_id.contains(key))
                     {
                         person_id.insert({ key, person_id_curr });
@@ -264,12 +267,15 @@ int main() {
                     }
                 }
             }
+            for (auto const& x : person_id)
+            {
+                CROW_LOG_INFO << x.first << x.second;
+            }
             Graph transactions(person_id_curr);
             for (int i = 0; i < result_select2.rows().size(); i++)
             {
                 std::string cashier = result_select2.rows().at(i).at(0).as_string();
                 std::string split_string_json = result_select2.rows().at(i).at(1).as_string();
-                split_string_json = split_string_json.substr(1, split_string_json.length() - 2);
                 std::stringstream ss(split_string_json);
                 while (ss.good()) {
                     std::string substr;
@@ -278,7 +284,6 @@ int main() {
                     int pos = substr.find(":");
                     key = substr.substr(0, pos);
                     value = substr.substr(pos + 1);
-                    key = key.substr(1, key.length() - 2);
                     transactions.insertEdge(person_id.at(key), person_id.at(cashier), stoi(value));
                 }
             }
@@ -389,7 +394,7 @@ int main() {
         params2.database = env["DB_GROUP"];
         conn2.connect(params2);
         boost::mysql::results result_select2;
-        const std::string statement_select2 = "SELECT * FROM transactions WHERE cashier = \"" + user + "\" OR members LIKE \"%'" + user + "'%\"";
+        const std::string statement_select2 = "SELECT * FROM transactions WHERE cashier = \"" + user + "\" OR members LIKE \"%" + user + ":%\"";
         conn2.execute(statement_select2, result_select2);
         conn2.close();
         if (!result_select2.rows().empty())
@@ -667,6 +672,18 @@ int main() {
     CROW_ROUTE(app, "/get_add_member_js")([]() {
         crow::response response;
         response.set_static_file_info("./src/scripts/add_member.js");
+        return response;
+    });
+    
+    CROW_ROUTE(app, "/get_tags_js")([]() {
+        crow::response response;
+        response.set_static_file_info("./src/scripts/tags.js");
+        return response;
+    });
+
+    CROW_ROUTE(app, "/get_tags_css")([]() {
+        crow::response response;
+        response.set_static_file_info("./src/styles/tags.css");
         return response;
     });
 

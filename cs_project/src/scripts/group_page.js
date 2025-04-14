@@ -75,10 +75,13 @@ async function find_transactions() {
                             })
                         }
                         else {
-                            var split = JSON.parse(obj2[0][3].replaceAll("'", "\""));
+                            var array = obj2[0][3].split(",");
                             var split_img = ""
-                            for (var key in split) {
-                                split_img = split_img + key + '->' + obj2[0][2] + "[label=" + String(split[key]) + "];";
+                            for (var i = 0; i < array.length; i++) {
+                                var index = array[i].indexOf(":");
+                                var key = array[i].substring(0, index);
+                                var value = array[i].substring(index + 1, array[i].length);
+                                split_img = split_img + key + '->' + obj2[0][2] + "[label=" + value + "];";
                             }
                             Swal.fire({
                                 icon: "info",
@@ -102,7 +105,7 @@ async function find_transactions() {
             response3.text().then(function (text) {
                 var obj3 = JSON.parse(text)
                 if (obj3[0]) {
-                    $("#container_cash_flow").append(obj3[0]);
+                    $("#cash-flow-body").append(obj3[0]);
                     $("#view_graph").bind("click", function () {
                         Swal.fire({
                             title: "Graph!",
@@ -137,18 +140,6 @@ $(document).ready(async function () {
         window.location.href = window.location.pathname.replace("group", "add_transaction");
     })
     $("#members_list").append($("#members_hidden").attr("class"));
-    $("#toggle_transaction").bind("change", function () {
-        if ($("#toggle_transaction").is(":checked")) {
-            $("#toggle_label").html("Transactions");
-            $("#container_cash_flow").removeAttr("hidden");
-            $("#container_transactions").prop("hidden", true);
-        }
-        else {
-            $("#toggle_label").html("Minimum Cash Flow");
-            $("#container_transactions").removeAttr("hidden");
-            $("#container_cash_flow").prop("hidden", true);
-        }
-    });
     $("#log_out").bind("click", function () {
         Swal.fire({
             title: "Logging out...",

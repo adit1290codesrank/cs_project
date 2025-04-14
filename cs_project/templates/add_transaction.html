@@ -9,6 +9,7 @@
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
     <link rel="icon" type="image/x-icon" href="/get">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+    <link rel="stylesheet" href="/get_tags_css" />
 </head>
 <body>
     <nav class="navbar navbar-expand-lg bg-body-tertiary">
@@ -54,13 +55,14 @@
             <label for="payment_desc" class="form-label">Payment Descriptipn</label>
             <textarea class="form-control" id="payment_desc" rows="5" placeholder="Enter Payment's Description..."></textarea>
         </div>
-        <div class="mb-3">
-            <label for="payment_desc" class="form-label">Split</label>
-            <textarea class="form-control" id="split_json" rows="5" placeholder="Enter Split  (in JSON)"></textarea>
+        <div class="input-group mb-3">
+            <span class="input-group-text">Split</span>
+            <input id="split_json" class="form-control" type="text" data-role="tagsinput" placeholder="Format(name:amount)">
         </div>
         <button class="btn btn-primary w-100 py-2" type="submit" id="add">Add Transaction</button>
     </div>
     <div id="group_id" hidden>{{group_id}}</div>
+    <script src="/get_tags_js"></script>
     <script src="/get_add_transaction_js"></script>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz" crossorigin="anonymous"></script>
     <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.8/dist/umd/popper.min.js" integrity="sha384-I7E8VVD/ismYTF4hNIPjVp/Zjvgyol6VFvRkX/vR+Vc4jQkC+hVqc2pM8ODewa9r" crossorigin="anonymous"></script>

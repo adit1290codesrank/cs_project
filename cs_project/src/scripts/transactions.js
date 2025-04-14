@@ -73,10 +73,13 @@ async function find_transactions() {
                     })
                 }
                 else {
-                    var split = JSON.parse(obj2[0][3].replaceAll("'", "\""));
+                    var array = obj2[0][3].split(",");
                     var split_img = ""
-                    for (var key in split) {
-                        split_img = split_img + key + '->' + obj2[0][2] + "[label=" + String(split[key]) + "];";
+                    for (var i = 0; i < array.length; i++) {
+                        var index = array[i].indexOf(":");
+                        var key = array[i].substring(0, index);
+                        var value = array[i].substring(index + 1, array[i].length);
+                        split_img = split_img + key + '->' + obj2[0][2] + "[label=" + value + "];";
                     }
                     Swal.fire({
                         icon: "info",

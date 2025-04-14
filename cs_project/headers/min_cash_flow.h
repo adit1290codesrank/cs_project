@@ -47,7 +47,7 @@ std::string min_cash_flow(Graph graph, std::map<std::string, int> person_id)
 	MaxHeap<std::string> creditors;
 	MinHeap<std::string> debitors;
     std::tie(creditors, debitors) = initializeHeap(graph, person_id);
-    std::string response;
+    std::string response = "<ul class='list-group text-center'><li class='list-group-item active' aria-current='true'>Cash Flow</li>";
     while (!creditors.isEmpty() && !debitors.isEmpty())
     {
         std::pair<std::string, int> max_creditor = creditors.pop();
@@ -55,19 +55,20 @@ std::string min_cash_flow(Graph graph, std::map<std::string, int> person_id)
         int amount = max_creditor.second + max_debitor.second;
         if (amount > 0)
         {
-            response += max_debitor.first + " owes " + max_creditor.first + " " + std::to_string(-max_debitor.second) + "</br>";
+            response +="<li class='list-group-item'>"+max_debitor.first + " owes " + max_creditor.first + " " + std::to_string(-max_debitor.second) + "</li>";
             creditors.push(max_creditor.first, amount);
         }
         else if (amount < 0)
         {
-            response += max_debitor.first + " owes " + max_creditor.first + " " + std::to_string(max_creditor.second) + "</br>";
+            response += "<li class='list-group-item'>" + max_debitor.first + " owes " + max_creditor.first + " " + std::to_string(max_creditor.second) + "</li>";
             debitors.push(max_debitor.first, amount);
         }
         else
         {
-            response += max_debitor.first + " owes " + max_creditor.first + " " + std::to_string(max_creditor.second) + "</br>";
+            response += "<li class='list-group-item'>" + max_debitor.first + " owes " + max_creditor.first + " " + std::to_string(max_creditor.second) + "</li>";
         }
     }
+    response += "</ul>";
     return response;
 }
 

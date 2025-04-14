@@ -56,17 +56,16 @@
                             <br />
                             <br />
                             <br />
-                            <div class="form-check form-switch form-check-reverse">
-                                <input class="form-check-input" type="checkbox" id="toggle_transaction">
-                                <label id="toggle_label" class="form-check-label" for="toggle_transaction">Minimum Cash Flow</label>
-                            </div>
+                            <a class="btn btn-primary" data-bs-toggle="offcanvas" href="#offcanvasExample" role="button" aria-controls="offcanvasExample">
+                                Minimum Cash Flow
+                            </a>
                         </div>
                     </div>
                 </div>
             </div>
         </div>
         <div class="col">
-            <div class="card"  style="max-height:30vh;overflow-y:auto;">
+            <div class="card" style="max-height:30vh;overflow-y:auto;">
                 <div class="card-header">
                     Members
                 </div>
@@ -87,6 +86,18 @@
         </div>
         <div id="container_cash_flow" class="container-fluid m-auto p-5" style="width:40vw" hidden>
 
+        </div>
+    </div>
+    <div class="offcanvas offcanvas-start" tabindex="-1" id="offcanvasExample" aria-labelledby="offcanvasExampleLabel">
+        <div class="offcanvas-header">
+            <h5 class="offcanvas-title m-auto" id="offcanvasExampleLabel">Minimum Cash Flow</h5>
+            <button type="button" class="btn-close" data-bs-dismiss="offcanvas" aria-label="Close"></button>
+        </div>
+        <hr />
+        <div id="cash-flow-body" class="offcanvas-body">
+            <div class="m-auto p-3">
+                The following is the list of transactions to settle everything.
+            </div>
         </div>
     </div>
     <div class="{{group_id}}" id="group_id" hidden></div>
