@@ -40,8 +40,8 @@ After optimization: just `n - 1`
 
 ## 🛠️ Tech Stack
 
-- **Frontend:** HTML, CSS, JavaScript (or your framework of choice)
-- **Backend:** Node.js / Flask / Django (as used)
+- **Frontend:** HTML, CSS, Bootstrap5
+- **Backend:** C++(Crow)
 - **Database:** MySQL
 - **Algorithm:** Graph theory (Directed, Weighted Graphs) + Heaps for optimization
 
